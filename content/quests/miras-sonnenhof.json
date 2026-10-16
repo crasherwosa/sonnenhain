@@ -1,0 +1,20 @@
+{
+  "id": "miras-sonnenhof",
+  "type": "heart",
+  "title": "Miras Sonnenhof",
+  "region": "Goldwiesen",
+  "giver": "Mira",
+  "summary": "Hilf Mira, ihren Hof von Glibbern und Pilzlingen zu befreien.",
+  "dialogue": {
+    "intro": "Die Glibber naschen an meinen Kürbissen und die Pilzlinge pusten Sporen aufs Feld. Hilfst du mir? Und bring mir ein paar Sonnenblüten mit!",
+    "progress": "Hallo! Gut, dass du da bist. Die Glibber naschen an meinen Kürbissen. Sprich mich an, wenn du helfen willst!",
+    "done": "Mein Hof strahlt wieder! Danke dir, Held der Goldwiesen."
+  },
+  "objectives": [
+    { "kind": "defeat", "target": "slime", "label": "Vertreibe Glibber vom Feld", "points": 6 },
+    { "kind": "defeat", "target": "shroom", "label": "Vertreibe Pilzlinge vom Feld", "points": 8 },
+    { "kind": "defeat", "target": "champ", "label": "Besiege den Goldglibber", "points": 25 },
+    { "kind": "collect", "target": "sunblossom", "label": "Pflücke leuchtende Sonnenblüten", "points": 7 }
+  ],
+  "rewards": { "xp": 900 }
+}
