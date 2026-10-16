@@ -11,3 +11,18 @@ Quelle: Kay Lousberg, www.kaylousberg.com – Lizenz CC0 (frei nutzbar, auch kom
 Alle Figuren nutzen das Skelett `Rig_Medium`, daher passen alle Animationen auf alle Figuren.
 
 `uebersicht.png` zeigt den Inhalt des Pakets.
+
+## Früher im Spiel verwendet
+
+Seit dem Wechsel auf die Quaternius-Figuren (`../quaternius/`) nutzt das Spiel von KayKit nur noch die Waffen aus `zubehoer/`. Figuren und Animationen bleiben für spätere Gegner und NPCs. Frühere Zuordnung:
+
+| Klasse im Spiel | Figur | Waffen |
+| --- | --- | --- |
+| Sternenweberin (Magierin) | `Mage.glb` | `staff` |
+| Klingenwächter (Ritter) | `Knight.glb` | `sword_1handed`, `shield_badge_color` |
+| Waldläufer | `Ranger.glb` | `bow_withString` |
+| Schattenklinge (Schurkin) | `Rogue_Hooded.glb` | zwei `dagger` |
+| Bärenherz (Barbar) | `Barbarian.glb` | `axe_2handed` |
+| Mira (Bäuerin) | `Rogue.glb` ohne Umhang | – |
+
+Geladen werden nur die Animationspakete General, MovementBasic, MovementAdvanced, CombatMelee, CombatRanged und Simulation. Die Zuordnung steht in `client/figuren.js`.

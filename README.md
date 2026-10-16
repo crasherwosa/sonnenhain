@@ -25,4 +25,6 @@ Wie wir arbeiten, steht in `docs/workflow.md`. Regeln für Claude stehen in `CLA
 ## Lizenzen
 
 - three.js: MIT-Lizenz, siehe `client/vendor/three/LICENSE`.
-- KayKit-Modelle (sobald eingebaut): CC0, von Kay Lousberg.
+- KayKit-Figuren und Animationen: CC0, von Kay Lousberg (www.kaylousberg.com), siehe `assets/characters/kaykit/`.
+- Quaternius-Figuren und Animationen: CC0, von Quaternius (www.quaternius.com), siehe `assets/characters/quaternius/`.
+- three.js-Zusatzdateien `GLTFLoader.js` und `SkeletonUtils.js` (r160) zum Laden der Figuren, ebenfalls MIT-Lizenz.

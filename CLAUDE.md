@@ -18,13 +18,15 @@ Sonnenhain ist ein stilisiertes Fantasy-Rollenspiel im Browser, inspiriert von G
 | Ordner | Inhalt |
 | --- | --- |
 | `client/` | Das Spiel. Statische Dateien, kein Build-Schritt. `client/index.html` ist der Einstieg. |
+| `client/figuren.js` | Lädt die Figuren (Quaternius mit echten Proportionen, KayKit für später), hängt Waffen an und steuert die Animationen. Welche Klasse welche Figur, Haarfarbe, Waffe und Angriffe hat, steht oben in der Datei. |
+| `client/figuren.html` | Figurenschau: alle Klassen nebeneinander, Bewegungen per Knopf. Zum Prüfen neuer Figuren und Waffen. |
 | `client/vendor/three/` | three.js r160, lokal mitgeliefert (nur die benötigten Dateien). Nicht verändern. |
 | `assets/` | Modelle (`.glb`), später Sounds und Bilder. Regeln in `assets/README.md`. |
 | `content/` | Spielinhalte als JSON: Quests, Dialoge, Gegnerwerte. Format in `content/README.md`. |
 | `docs/` | Spieldesign, Lore, Stil, Fahrplan, Arbeitsweise. |
 | `prototype/` | Archivierte Prototyp-Versionen zum Nachschlagen. Nicht weiterentwickeln. |
 | `server/` | Später: Mehrspieler-Server (Node.js, WebSockets). |
-| `tools/` | Hilfsskripte: lokaler Server, automatischer Rauchtest. |
+| `tools/` | Hilfsskripte: lokaler Server, automatischer Rauchtest, `figuren/bauen.mjs` zum Zusammensetzen der Quaternius-Figuren. |
 
 ## Technische Regeln
 

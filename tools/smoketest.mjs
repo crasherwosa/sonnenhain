@@ -1,7 +1,7 @@
 // Rauchtest: startet das Spiel in einem Browser ohne Grafikkarte, baut die Welt auf
 // und meldet Fehler. Screenshots landen in tools/out/.
 //
-// Aufruf:  node tools/smoketest.mjs [mittel|hoch|ultra] [mage|warrior|ranger|rogue]
+// Aufruf:  node tools/smoketest.mjs [mittel|hoch|ultra] [mage|warrior|ranger|rogue|barbarian]
 // Voraussetzung: Playwright mit Chromium (PLAYWRIGHT_MODULE kann auf das Modul zeigen).
 import { spawn } from 'node:child_process';
 import { mkdirSync } from 'node:fs';

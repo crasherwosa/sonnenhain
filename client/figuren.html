@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sonnenhain – Figurenschau</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #cfe3ee; font-family: Nunito, system-ui, sans-serif; overflow: hidden; }
+  canvas { display: block; touch-action: none; }
+  #ui { position: fixed; left: 0; right: 0; bottom: 0; padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;
+        background: rgba(20, 24, 30, .55); backdrop-filter: blur(6px); border-top: 1px solid rgba(230, 190, 110, .6); }
+  #ui button { font: inherit; font-size: 14px; color: #f5ecd7; background: rgba(255, 255, 255, .08); border: 1px solid rgba(230, 190, 110, .5); border-radius: 8px; padding: 6px 10px; }
+  #ui button[aria-pressed="true"] { background: rgba(230, 190, 110, .35); }
+  #note { position: fixed; top: 10px; left: 0; right: 0; text-align: center; color: #3b3f45; font-size: 14px; }
+</style>
+</head>
+<body>
+<div id="note">Figuren werden geladen …</div>
+<div id="ui"></div>
+<script type="importmap">
+{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/examples/jsm/"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { loadFigures, createFigure, FIGURES } from './figuren.js';
+
+// Figurenschau: alle Klassen nebeneinander, Bewegungen per Knopf.
+// Adresszusätze: ?klasse=mage&anim=Sword_Idle&zeit=0.4&nah=1 (für Screenshots)
+const q = new URLSearchParams(location.search);
+const NAMES = { mage: 'Sternenweberin', warrior: 'Klingenwächter', ranger: 'Waldläufer', rogue: 'Schattenklinge', barbarian: 'Bärenherz', mira: 'Mira' };
+const keys = q.get('klasse') ? q.get('klasse').split(',') : Object.keys(NAMES);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+document.body.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xcfe3ee);
+scene.add(new THREE.HemisphereLight(0xfff4e0, 0x6d7f5a, 1.4));
+const sun = new THREE.DirectionalLight(0xffffff, 2.2);
+sun.position.set(4, 8, 6); sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024);
+Object.assign(sun.shadow.camera, { left: -6, right: 6, top: 6, bottom: -6 });
+scene.add(sun);
+const ground = new THREE.Mesh(new THREE.CircleGeometry(9, 48), new THREE.MeshStandardMaterial({ color: 0x9bbf72, roughness: 1 }));
+ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+const camera = new THREE.PerspectiveCamera(35, 1, 0.05, 100);
+
+const lib = await loadFigures(keys);
+const figs = keys.map((k, i) => {
+  const f = createFigure(lib, k);
+  f.group.position.x = (i - (keys.length - 1) / 2) * 1.3;
+  scene.add(f.group);
+  f.setBase(FIGURES[k].idle);
+  return f;
+});
+document.getElementById('note').textContent = keys.map(k => NAMES[k]).join(' · ');
+
+const ANIMS = [['Stehen', null], ['Gehen', 'Walking_A'], ['Laufen', 'Running_A'], ['Angriff 1', 'a0'], ['Angriff 2', 'a1'], ['Zauber', 'a2'], ['Rolle', 'Dodge_Forward'], ['Treffer', 'Hit_A'], ['Tod', 'Death_A']];
+const ui = document.getElementById('ui');
+for (const [label, a] of ANIMS) {
+  const b = document.createElement('button'); b.textContent = label;
+  b.onclick = () => {
+    ui.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    figs.forEach(f => {
+      f.revive();
+      if (!a) return;
+      if (a[0] === 'a') f.attack(+a[1], 0, false);
+      else if (/Walking|Running/.test(a)) f.setBase(a);
+      else f.play(a, { hold: a === 'Death_A' });
+    });
+  };
+  ui.append(b);
+}
+
+// Kamera: ziehen zum Drehen, zwei Finger oder Mausrad zum Zoomen
+let yaw = 0, pitch = 0.12, dist = 2.6 + keys.length * 1.05, look = new THREE.Vector3(0, 0.95, 0);
+if (q.get('nah')) { dist = 2.4; look.y = 1.0; look.x = figs[0].group.position.x; }
+if (q.get('ohne')) figs.forEach(f => f.root.traverse(o => { if (q.get('ohne').split(',').includes(o.name)) o.visible = false; }));
+let drag = null;
+renderer.domElement.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY }; });
+addEventListener('pointerup', () => { drag = null; });
+addEventListener('pointermove', e => { if (!drag) return; yaw -= (e.clientX - drag.x) * 0.008; pitch = Math.max(-0.2, Math.min(1.2, pitch + (e.clientY - drag.y) * 0.006)); drag = { x: e.clientX, y: e.clientY }; });
+addEventListener('wheel', e => { dist = Math.max(1, Math.min(14, dist * (1 + e.deltaY * 0.001))); }, { passive: true });
+if (q.get('yaw')) yaw = +q.get('yaw');
+
+// feste Pose für Screenshots
+if (q.get('anim')) {
+  const t = +(q.get('zeit') || 0);
+  figs.forEach(f => { f.mixer.stopAllAction(); const name = q.get('anim'); const a = f.mixer.clipAction(lib.clips[f.def.rig][f.rig.names[name] || name]); a.play(); f.mixer.update(0); a.time = t * a.getClip().duration; f.mixer.update(0); });
+}
+const still = !!q.get('anim');
+const clock = new THREE.Clock();
+function frame(){
+  const dt = Math.min(clock.getDelta(), 0.05);
+  if (!still) figs.forEach(f => f.update(dt));
+  const w = innerWidth, h = innerHeight;
+  if (renderer.domElement.width !== Math.floor(w * renderer.getPixelRatio())) { renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+  camera.position.set(look.x + Math.sin(yaw) * Math.cos(pitch) * dist, look.y + Math.sin(pitch) * dist, look.z + Math.cos(yaw) * Math.cos(pitch) * dist);
+  camera.lookAt(look);
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+frame();
+window.__figs = figs; window.__lib = lib; window.__ready = true;
+</script>
+</body>
+</html>
