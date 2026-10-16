@@ -19,6 +19,7 @@ Sonnenhain ist ein stilisiertes Fantasy-Rollenspiel im Browser, inspiriert von G
 | --- | --- |
 | `client/` | Das Spiel. Statische Dateien, kein Build-Schritt. `client/index.html` ist der Einstieg. |
 | `client/figuren.js` | Lädt die Figuren (Quaternius mit echten Proportionen, KayKit für später), hängt Waffen an und steuert die Animationen. Welche Klasse welche Figur, Haarfarbe, Waffe und Angriffe hat, steht oben in der Datei. |
+| `client/umgebung.js` | Wolken, Unterholz (Farne, Grasbüschel, Schilf, Seerosen, Stümpfe) und Wind. Gelände, Licht, Himmel und Wasser stehen noch in `client/index.html`. |
 | `client/figuren.html` | Figurenschau: alle Klassen nebeneinander, Bewegungen per Knopf. Zum Prüfen neuer Figuren und Waffen. |
 | `client/vendor/three/` | three.js r160, lokal mitgeliefert (nur die benötigten Dateien). Nicht verändern. |
 | `assets/` | Modelle (`.glb`), später Sounds und Bilder. Regeln in `assets/README.md`. |
@@ -41,6 +42,7 @@ Sonnenhain ist ein stilisiertes Fantasy-Rollenspiel im Browser, inspiriert von G
 
 - Lokal starten: `tools/serve.sh` und dann `http://localhost:8765/client/` öffnen.
 - Rauchtest ohne Grafikkarte: `node tools/smoketest.mjs` (benötigt Playwright mit Chromium). Startet das Spiel, wartet auf den Weltaufbau, meldet Konsolenfehler und legt Screenshots in `tools/out/` ab.
+- Vorher/Nachher-Bilder der Welt aus festen Blickwinkeln: `node tools/ansichten.mjs [mittel|hoch|ultra]`, Bilder in `tools/out/ansichten/`.
 - Vor jedem Hochladen: Rauchtest muss ohne Fehler durchlaufen.
 
 ## Commits

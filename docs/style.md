@@ -6,6 +6,16 @@
 - **Hell und freundlich**, aber nicht kindlich: gedeckte, natürliche Grundfarben (Grüntöne, Erde, Stein), kräftige Akzente nur für Wichtiges (Magie, Beute, Gefahr).
 - **Lesbarkeit vor Detail:** Silhouetten müssen aus der Kameraentfernung (ca. 8–12 m) klar erkennbar sein.
 
+## Umgebung
+
+- **Vorbild Guild Wars 2:** warmes Sonnenlicht, leicht bläuliche Schatten, kräftige aber natürliche Grüntöne, goldene Flecken in den Wiesen („Goldwiesen“).
+- **Tiefe durch Dunst:** Was weit weg ist, wird blasser und bläulich. So wirken Berge groß und fern.
+- **Himmel:** gemalte Haufenwolken hoch über den Bergen, dazu feine Schleierwolken. Keine Kugelwolken.
+- **Dichte Pflanzen in Schichten:** Bäume, darunter Büsche, Farne und hohe Grasbüschel, am Boden Gras und Blumen. Am Ufer Schilf und Seerosen.
+- **Wasser:** am Ufer hell und türkis mit Schaumrand, in der Tiefe dunkelblau.
+- **Bewegung:** sanfter Wind in Gras, Farnen und Baumkronen (in der Grafikstufe „Mittel“ aus).
+- Alles wird im Code erzeugt (`client/umgebung.js` und `client/index.html`), es gibt keine fremden Dateien. Später können Modelle aus Blender einzelne Teile ersetzen.
+
 ## Figuren
 
 - **Spielfiguren und Menschen:** Quaternius-Figuren (Universal Base Characters + Modular Character Outfits, CC0) mit echten Proportionen, ca. 1,70–1,80 m groß. Details in `assets/characters/quaternius/README.md`.
