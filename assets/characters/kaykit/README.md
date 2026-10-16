@@ -12,7 +12,9 @@ Alle Figuren nutzen das Skelett `Rig_Medium`, daher passen alle Animationen auf 
 
 `uebersicht.png` zeigt den Inhalt des Pakets.
 
-## Im Spiel verwendet
+## Früher im Spiel verwendet
+
+Seit dem Wechsel auf die Quaternius-Figuren (`../quaternius/`) nutzt das Spiel von KayKit nur noch die Waffen aus `zubehoer/`. Figuren und Animationen bleiben für spätere Gegner und NPCs. Frühere Zuordnung:
 
 | Klasse im Spiel | Figur | Waffen |
 | --- | --- | --- |

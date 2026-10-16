@@ -2624,7 +2624,7 @@ function frame(now){
   for (const r of runeRings) { r.rotation.y += dt * 0.6; r.children[1].rotation.x += dt * 1.1; r.position.y += Math.sin(gameTime * 1.5) * 0.002; }
 
   // Mira idles
-  if (mira) { mira.group.rotation.y = lerpAngle(mira.group.rotation.y, dist2(MIRA_POS, P.pos) < 10 ? Math.atan2(P.pos.x - MIRA_POS.x, P.pos.z - MIRA_POS.z) : 0.3, 0.05); mira.setBase(bubbleT > 0 ? 'Waving' : 'Idle_B'); mira.update(dt); }
+  if (mira) { mira.group.rotation.y = lerpAngle(mira.group.rotation.y, dist2(MIRA_POS, P.pos) < 10 ? Math.atan2(P.pos.x - MIRA_POS.x, P.pos.z - MIRA_POS.z) : 0.3, 0.05); mira.setBase(bubbleT > 0 ? (mira.def.greet || 'Waving') : mira.def.idle); mira.update(dt); }
 
   // target ring
   const t = P.target;
