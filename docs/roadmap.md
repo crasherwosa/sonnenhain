@@ -6,6 +6,7 @@ Stand: 16.10.2026
 
 - Prototyp v10 im Browser: Gelände, Wasser mit Spiegelung, Bäume, Wiese, Hof, Ruinen, Kampf mit 5 Fertigkeiten, Ausweichen, Gegner (Glibber, Pilzlinge, Goldglibber), Herz-Aufgabe bei Mira, Grafikstufen, Handy-Steuerung.
 - Repository angelegt, Prototyp als Startpunkt übernommen (`client/`), three.js lokal mitgeliefert.
+- KayKit-Figuren, Zubehör und Animationen in `assets/characters/kaykit/` abgelegt.
 
 ## Als Nächstes
 

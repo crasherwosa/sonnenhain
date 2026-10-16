@@ -24,4 +24,4 @@ Bei jedem fremden Modell die Lizenz und Quelle hier eintragen.
 
 | Datei | Quelle | Lizenz |
 | --- | --- | --- |
-| – | – | – |
+| `characters/kaykit/` | KayKit Adventurers 2.0 und Character Animations 1.1, Kay Lousberg | CC0 |
