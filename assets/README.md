@@ -25,4 +25,5 @@ Bei jedem fremden Modell die Lizenz und Quelle hier eintragen.
 | Datei | Quelle | Lizenz |
 | --- | --- | --- |
 | `characters/kaykit/` | KayKit Adventurers 2.0 und Character Animations 1.1, Kay Lousberg | CC0 |
+| `characters/eigene/` | Eigene Figuren aus Blender; Grundkörper und Hauttextur aus Quaternius Universal Base Characters | CC0 (Grundkörper), eigene Arbeit |
 | `characters/quaternius/` | Universal Base Characters, Modular Character Outfits – Fantasy, Universal Animation Library 1 und 2 (je Standard-Fassung), Quaternius | CC0 |
