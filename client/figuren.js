@@ -54,8 +54,8 @@ for (const r of Object.values(RIGS)) r.lower = new Set(r.lower);
    hide: Teile der Figur, die ausgeblendet werden (Kapuze, Bart, Haare).
    hand: 'r' = rechte Hand, 'l' = linke Hand. tip: wo Zauber und Geschosse starten. */
 export const FIGURES = {
-  // Sternenweberin: Abenteurerin mit langen Haaren und Stab (wie das Referenzbild)
-  mage:      { rig: 'ual', model: 'abenteurerin', hide: ['Female_Ranger_Head_Hood'], colors: { MI_Hair_2: 0xfff1d0 }, items: [['staff', 'r']], tip: 'r', idle: 'Idle_Loop', attack: ['Spell_Simple_Shoot', 'Spell_Simple_Shoot'] },
+  // Sternenweberin: eigene Abenteurerin aus Blender (wie das Referenzbild), assets/characters/eigene/
+  mage:      { rig: 'ual', file: 'eigene/abenteurerin.glb', hide: [], colors: {}, items: [['staff', 'r']], tip: 'r', idle: 'Idle_Loop', attack: ['Spell_Simple_Shoot', 'Spell_Simple_Shoot'] },
   // Klingenwächter: Abenteurer mit Schwert und Schild
   warrior:   { rig: 'ual', model: 'abenteurer', hide: ['Male_Ranger_Head_Hood', 'Hair_Beard'], colors: { MI_Hair_1: 0x6b4a32 }, items: [['sword_1handed', 'r'], ['shield_badge_color', 'l']], tip: 'r', idle: 'Sword_Idle', attack: ['Sword_Regular_A', 'Sword_Regular_B'] },
   // Waldläufer: Abenteurer mit Kapuze und Bogen
@@ -77,7 +77,8 @@ function load(url){
   return cache.get(url);
 }
 const findBone = (root, name) => root.getObjectByName(name) || root.getObjectByName(name.replace(/\./g, ''));
-const modelUrl = def => RIGS[def.rig].base + 'figuren/' + def.model + '.glb';
+// file: eigene Figur außerhalb des Figurenordners der Figurenart (z. B. 'eigene/abenteurerin.glb')
+const modelUrl = def => def.file ? ASSETS + def.file : RIGS[def.rig].base + 'figuren/' + def.model + '.glb';
 
 /* Lädt die Figuren der gewählten Klassen und alle benötigten Animationen. */
 export async function loadFigures(keys, onProgress){

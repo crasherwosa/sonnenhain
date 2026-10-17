@@ -11,7 +11,7 @@ Sonnenhain ist ein stilisiertes Fantasy-Rollenspiel im Browser, inspiriert von G
 - Der Projektinhaber ist kein Programmierer. Er arbeitet oft am Handy. Antworten auf Deutsch, in einfacher Sprache, ohne Fachjargon. Fachbegriffe kurz erklären.
 - Eine Aufgabe pro Chat. Der Wissensstand liegt in diesem Repository (`docs/`, `content/`), nicht im Chatverlauf.
 - Größere Änderungen vor dem Umsetzen kurz ankündigen. Nach dem Umsetzen: testen, Vorschau geben, erst dann ins Repository.
-- Modelle entstehen in Blender (Claude Desktop + BlenderMCP auf dem Mac des Inhabers) und kommen als `.glb` nach `assets/`. Diese Sitzungen hier können Blender nicht steuern.
+- Modelle entstehen in Blender und kommen als `.glb` nach `assets/`. Zwei Wege: Claude Desktop + BlenderMCP auf dem Mac des Inhabers, oder per Python-Skript in jeder Cloud-Sitzung (`pip install bpy`, ohne Bildschirm). Skripte für eigene Figuren liegen in `tools/blender/`, Anleitung in `assets/characters/eigene/README.md`.
 
 ## Aufbau
 
@@ -26,7 +26,7 @@ Sonnenhain ist ein stilisiertes Fantasy-Rollenspiel im Browser, inspiriert von G
 | `docs/` | Spieldesign, Lore, Stil, Fahrplan, Arbeitsweise. |
 | `prototype/` | Archivierte Prototyp-Versionen zum Nachschlagen. Nicht weiterentwickeln. |
 | `server/` | Später: Mehrspieler-Server (Node.js, WebSockets). |
-| `tools/` | Hilfsskripte: lokaler Server, automatischer Rauchtest, `figuren/bauen.mjs` zum Zusammensetzen der Quaternius-Figuren. |
+| `tools/` | Hilfsskripte: lokaler Server, automatischer Rauchtest, `figuren/bauen.mjs` zum Zusammensetzen der Quaternius-Figuren, `blender/` zum Bauen eigener Figuren, `figuren/skelett.mjs` setzt sie auf das Original-Skelett. |
 
 ## Technische Regeln
 

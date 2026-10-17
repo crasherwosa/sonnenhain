@@ -8,9 +8,14 @@
 
 ## Figuren
 
-- **Spielfiguren und Menschen:** Quaternius-Figuren (Universal Base Characters + Modular Character Outfits, CC0) mit echten Proportionen, ca. 1,70–1,80 m groß. Details in `assets/characters/quaternius/README.md`.
+- **Spielfiguren und Menschen:** eigene Figuren aus Blender auf dem Quaternius-Grundkörper (CC0) mit echten Proportionen, ca. 1,70–1,80 m groß. Erste eigene Figur: die Abenteurerin (Sternenweberin), `assets/characters/eigene/`. Die fertigen Quaternius-Outfits bleiben vorerst für die übrigen Klassen und werden nach und nach ersetzt.
+- **Sauberer, ruhiger Look:** klare Formen und einfarbige Flächen (Stoff, Leder, Messing) statt unruhiger Fototexturen. Tiefe entsteht durch weiche, eingebackene Schatten in Falten, an Kanten und unter Riemen. Jedes Kleidungsstück hat eine sichtbare Kante (Saum), Ränder sind geglättet.
+- **Haut:** hell und warm (Pfirsich), weich gemalt; Gesicht freundlich, ohne harte Details.
 - **Kleidung:** helle Stoffe (Weiß, Creme, gedecktes Grün) mit braunem Leder, Riemen, Schnallen und Armschienen. Metall sparsam (Schulterstück, Beschläge).
-- **Haare:** kräftige, natürliche Farben (Blond, Braun, Rot, Dunkelbraun), über die Materialfarbe im Spiel einstellbar.
+- **Farben der Spielfiguren:** im Stil von Guild Wars: warmes Elfenbein statt reinem Weiß, sattes Rotbraun beim Leder, Gold für Metall, dazu ein kräftiger Akzent pro Figur (Abenteurerin als Magierin: Creme und Türkis mit Goldborte). Keine grellen, reinen Farben.
+- **Gemalte Details:** Stoff zeigt feines Gewebe, Leder eine Maserung und hellere, abgenutzte Kanten, Ränder haben sichtbare Steppnähte. Die Details werden in Blender in Texturen gebacken (`tools/blender/details.py`), nicht als zusätzliche Dreiecke. Augen etwas größer als realistisch, damit Gesichter freundlich und aus der Ferne lesbar sind.
+- **Haare:** kräftige, natürliche Farben (Blond, Braun, Rot, Dunkelbraun), über die Materialfarbe im Spiel einstellbar. Lange Haare als breite, flache, leicht gewellte Strähnen; unten am Oberkörper befestigt, damit sie beim Kopfdrehen nicht durch die Schultern schwingen.
+- **Erkennungszeichen:** jede Spielfigur bekommt ein markantes Teil für die Silhouette (bei der Abenteurerin: Schulterstück links, Stirnband mit Brille, Stiefelstulpen).
 - **Waffen:** die KayKit-Waffen bleiben vorerst; sie sind etwas klobiger als die Figuren. Später durch schlankere Waffen ersetzen.
 - **Gegner und Kreaturen** dürfen verspielter sein (Glibber, Pilzlinge, später KayKit-Skelette).
 
@@ -18,6 +23,7 @@
 
 - Gemalte, weiche Texturen statt Fototexturen. Höchstens 1024 × 1024 Pixel pro Figurentextur.
 - Animationen kommen aus der Universal Animation Library (gleiches Skelett für alle Figuren).
+- Eigene Figuren werden per Skript in Blender gebaut (`tools/blender/`), damit jede Änderung nachvollziehbar und wiederholbar ist. Budget: höchstens ca. 30.000 Dreiecke und 2 MB pro Spielfigur, höchstens vier Teile (Haut, Kleidung, Haare, Kopfschmuck).
 - Technische Regeln in `assets/README.md`.
 
 ## Benutzeroberfläche
