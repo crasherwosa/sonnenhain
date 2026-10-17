@@ -11,6 +11,9 @@ Stand: 16.10.2026
 
 - Figuren mit echten Proportionen: Quaternius-Figuren (CC0) im Stil des Referenzbilds. Die Sternenweberin ist eine blonde Abenteurerin in Weiß und Leder, die anderen Klassen unterscheiden sich durch Kapuze, Haare, Bart und Waffen. Mira ist eine Bäuerin. 32 Animationen aus der Universal Animation Library (Gehen, Joggen, Rennen, Rolle, Schwertkombos, Zauber, Treffer, Tod). `client/figuren.js` kann jetzt zwei Figurenarten (Quaternius und KayKit). Neue Figurenschau `client/figuren.html`, Bauskript `tools/figuren/bauen.mjs`.
 
+- Umgebung im Stil von Guild Wars 2: gemalte Haufenwolken, bläulicher Dunst in der Ferne, wärmeres Licht mit bläulichen Schatten, hellere Wiesen mit goldenen Flecken. Neues Unterholz (Farne, hohe Grasbüschel, Baumstümpfe, liegende Stämme), Schilf und Seerosen an den Seen, türkisfarbenes Wasser mit Schaumrand. Sanfter Wind in Gras und Bäumen, Baumkronen bleiben auch in der Ferne dicht. Dichte, Sichtweite und Wind folgen den Grafikstufen. Code in `client/umgebung.js`, Vorher/Nachher-Bilder mit `tools/ansichten.mjs`.
+- Umgebung nach der Stil-Anweisung (Vorbild Guild Wars 3): Tageszeit „Goldene Stunde“ (tiefe Sonne, rosa-fliederfarbener Himmel, lange Schatten) als neue Grundeinstellung, „Mittag“ wählbar auf dem Startbildschirm. Flache Nebelbänder über Wiesen und See, fliederfarbener Dunst, höheres Gras mit leuchtenden Spitzen im Gegenlicht, Blumen in blau-lila Gruppen mit roten und orangen Tupfern, Pollen, die im Gegenlicht aufleuchten, feines Filmkorn.
+
 ## Als Nächstes
 
 1. **Aufräumen und Leistung:** `client/index.html` in Module aufteilen (Welt, Spieler, Kampf, Gegner, Quests, Oberfläche). Grafikstufen neu abstimmen, damit es am Mac und iPhone flüssig läuft.
