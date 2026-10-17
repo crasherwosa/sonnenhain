@@ -4,3 +4,4 @@ tools/out/
 *.log
 .env
 tools/blender/arbeit/
+__pycache__/

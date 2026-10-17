@@ -13,13 +13,17 @@ Stand: 16.10.2026
 
 - Erste eigene Figur aus Blender: die Sternenweberin ist jetzt eine selbst gebaute Abenteurerin nach dem Referenzbild (weißes Oberteil, Lederkorsett, Schulterstück, Armschienen, Stiefel mit Stulpen, lange blonde Haare, Stirnband mit Brille). Gebaut per Skript (`tools/blender/`) auf dem Quaternius-Grundkörper, mit allen bisherigen Animationen. Saubere einfarbige Flächen mit weichen eingebackenen Schatten statt unruhiger Texturen. Stil festgehalten in `docs/style.md`.
 
+## Erledigt: Details der Abenteurerin
+
+Gemalte Stoff- und Ledertextur mit Nähten, abgenutzte Lederkanten, Haarsträhnen, größere Augen, Farben im Guild-Wars-Stil (Elfenbein, Rotbraun, Gold, saphirblaue Stoffbahn). Siehe `assets/characters/eigene/vergleich-details.jpg`.
+
 ## Als Nächstes
 
 1. **Aufräumen und Leistung:** `client/index.html` in Module aufteilen (Welt, Spieler, Kampf, Gegner, Quests, Oberfläche). Grafikstufen neu abstimmen, damit es am Mac und iPhone flüssig läuft.
 2. **Quests aus Daten:** Herz-Aufgabe aus `content/quests/` laden statt fest im Code.
 3. **Lore:** Weltgeschichte, Regionen und erste Kapitel in `docs/lore.md` ausarbeiten.
 4. **Klassen-Fertigkeiten:** je Klasse eigene Fertigkeiten (Schwert, Bogen, Dolche, Axt, Magie). Die Angriffs-Animationen je Klasse sind schon da (`client/figuren.js`).
-5. **Weitere eigene Figuren und Waffen:** mit `tools/blender/` auch Klingenwächter, Waldläufer, Schattenklinge, Bärenherz und Mira selbst bauen (männlicher Grundkörper liegt bei Quaternius bei). Schlanke Waffen, z. B. ein Stab passend zur Sternenweberin. Eigene Bogen- und Magie-Animationen fehlen noch. Möglicher Feinschliff der Abenteurerin: gemalte Stoff- und Ledertextur (Nähte), größere Augen.
+5. **Weitere eigene Figuren und Waffen:** mit `tools/blender/` auch Klingenwächter, Waldläufer, Schattenklinge, Bärenherz und Mira selbst bauen (männlicher Grundkörper liegt bei Quaternius bei). Schlanke Waffen, z. B. ein Stab passend zur Sternenweberin. Eigene Bogen- und Magie-Animationen fehlen noch.
 6. **Gegner als KayKit-Figuren:** z. B. KayKit Skeletons; die Skelett-Animationen liegen bereits in `Rig_Medium_Special.glb`.
 
 ## Später

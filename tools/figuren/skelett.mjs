@@ -44,7 +44,7 @@ for (const n of doc.getRoot().listNodes()) if (n.getName() === 'Armature') n.set
 await doc.transform(
   prune({ keepLeaves: true }),
   dedup(),
-  textureCompress({ encoder: sharp, targetFormat: 'jpeg', resize: [1024, 1024], quality: 85 }),
+  textureCompress({ encoder: sharp, targetFormat: 'jpeg', resize: [2048, 2048], quality: 85 }),
 );
 await io.write(OUT, doc);
 let tris = 0;

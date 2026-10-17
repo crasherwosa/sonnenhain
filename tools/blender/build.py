@@ -18,22 +18,41 @@ body = bpy.data.objects['Superhero_Female']; body.name = 'Body'
 eyes = bpy.data.objects['Eyes']
 brows = bpy.data.objects['Eyebrows']
 
+# ---------------------------------------------------------------- größere Augen (Stil: freundlich, gemalt)
+# Augen und Umgebung (Lider, Brauen) werden um die Augenmitte leicht vergrößert, weich auslaufend.
+EYE_SCALE, EYE_R = 1.16, 0.032
+_ev = [eyes.matrix_world @ v.co for v in eyes.data.vertices]
+EYE_C = [sum((p for p in _ev if (p.x > 0) == side), Vector()) / max(1, sum(1 for p in _ev if (p.x > 0) == side)) for side in (True, False)]
+def _grow(o, full=False):
+    assert not o.data.shape_keys, o.name
+    mw = o.matrix_world; inv = mw.inverted()
+    for v in o.data.vertices:
+        p = mw @ v.co
+        c = EYE_C[0] if p.x > 0 else EYE_C[1]
+        d = (p - c); dist = math.hypot(d.x, d.z) + abs(d.y) * 0.5
+        f = 1.0 if full else max(0.0, 1 - dist / EYE_R); f = f * f * (3 - 2 * f)
+        k = 1 + (EYE_SCALE - 1) * f
+        v.co = inv @ Vector((c.x + d.x * k, c.y + d.y * (1 + (k - 1) * 0.4), c.z + d.z * k))
+_grow(body); _grow(brows); _grow(eyes, full=True)
+print('Augen vergrößert, Mitte', [tuple(round(x, 3) for x in c) for c in EYE_C])
+
 # Körperoberfläche als Referenz für Abstände (Grundhaltung)
 _bm = bmesh.new(); _bm.from_mesh(body.data)
 BODY = BVHTree.FromBMesh(_bm); _bm.free()
 
 # ---------------------------------------------------------------- Materialien
-C = {
-    'linen':   (srgb('#f3eee4'), 0.9, 0.0),
-    'leather': (srgb('#94603a'), 0.62, 0.0),
-    'leather2':(srgb('#5e3c26'), 0.6, 0.0),
-    'boot':    (srgb('#6e4428'), 0.55, 0.0),
-    'brass':   (srgb('#d8b066'), 0.32, 0.9),
+C = {   # Farben im Guild-Wars-Stil: warmes Elfenbein, sattes Leder, Gold, ein kräftiger Akzent
+    'linen':   (srgb('#f0e6d0'), 0.9, 0.0),
+    'accent':  (srgb('#2d5c8f'), 0.85, 0.0),
+    'leather': (srgb('#8e5230'), 0.6, 0.0),
+    'leather2':(srgb('#4f2f1e'), 0.58, 0.0),
+    'boot':    (srgb('#64391f'), 0.55, 0.0),
+    'brass':   (srgb('#e2b45c'), 0.3, 0.9),
     'steel':   (srgb('#c4cacd'), 0.3, 0.9),
-    'fur':     (srgb('#ece2cd'), 0.95, 0.0),
-    'hair':    (srgb('#f7de9e'), 0.5, 0.0),
-    'brow':    (srgb('#b98f55'), 0.7, 0.0),
-    'lens':    (srgb('#86d0e0'), 0.08, 0.1),
+    'fur':     (srgb('#ece0c6'), 0.95, 0.0),
+    'hair':    (srgb('#f4d27e'), 0.5, 0.0),
+    'brow':    (srgb('#b5874a'), 0.7, 0.0),
+    'lens':    (srgb('#7fd3e6'), 0.08, 0.1),
 }
 M = {k: mat('M_' + k, *v) for k, v in C.items()}
 
@@ -238,7 +257,7 @@ for i in range(rows - 1):
         bm.faces.new((grid[i][j], grid[i][j + 1], grid[i + 1][j + 1], grid[i + 1][j]))
 idx = {v: k for k, v in enumerate(bm.verts)}
 me = bpy.data.meshes.new('Tabard'); bm.to_mesh(me); bm.free()
-tab = add_obj('Tabard', me); set_mat(tab, M['linen'])
+tab = add_obj('Tabard', me); set_mat(tab, M['accent'])
 for b_ in ('pelvis', 'thigh_l', 'thigh_r'): tab.vertex_groups.new(name=b_)
 for v, w in wl:
     for g, x in w.items(): tab.vertex_groups[g].add([idx[v]], x, 'REPLACE')

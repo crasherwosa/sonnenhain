@@ -3,6 +3,7 @@ in die Punktfarben und exportiert eine .glb. Aufruf: python export.py <ziel.glb>
 import os, sys; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bpy
 from blib import ARBEIT
+from details import add_edge_attr, bake_details
 
 OUT = sys.argv[-1]
 bpy.ops.wm.open_mainfile(filepath=ARBEIT + '/figur.blend')
@@ -19,6 +20,11 @@ def group_of(n):
 
 parts = {}
 for o in arm.children:
+    if o.type == 'MESH': add_edge_attr(o)   # Abstand zum Saum, für Nähte und Kanten
+# flache Teile nicht vereinfachen, sonst verschwimmen Borte und Nähte
+for n in ('Tabard',):
+    o = bpy.data.objects[n]; vg = o.vertex_groups.new(name='Behalten'); vg.add(list(range(len(o.data.vertices))), 1.0, 'REPLACE')
+for o in arm.children:
     if o.type == 'MESH': parts.setdefault(group_of(o.name), []).append(o)
 joined = []
 for g, objs in parts.items():
@@ -34,6 +40,7 @@ for g, objs in parts.items():
 for o in joined:
     if o.name == 'Outfit':
         d = o.modifiers.new('D', 'DECIMATE'); d.ratio = 0.8
+        d.vertex_group = 'Behalten'; d.invert_vertex_group = True
         o.modifiers.move(len(o.modifiers) - 1, 0)
         bpy.context.view_layer.objects.active = o
         with bpy.context.temp_override(object=o): bpy.ops.object.modifier_apply(modifier='D')
@@ -73,6 +80,14 @@ for o in joined:
         x = floor + (1 - floor) * min(1, ao * 1.15)
         ca.data[v.index].color = (x, x, x, 1)
     print(o.name, 'AO Mittel', round(tot / len(me.vertices), 2))
+
+# Gemalte Details (Gewebe, Leder, Nähte, Strähnen) in Texturen backen, in Grundhaltung
+arm.data.pose_position = 'REST'
+SIZES = {'Outfit': (2048, 1024), 'Hair': (1024, 512), 'Headgear': (512, None)}
+for o in joined:
+    if o.name in SIZES:
+        img, nimg = bake_details(o, *SIZES[o.name]); print(o.name, 'gebacken', img.name, nimg.name if nimg else '-')
+arm.data.pose_position = 'POSE'
 
 for m in bpy.data.materials: m.use_backface_culling = True
 bpy.ops.object.select_all(action='DESELECT')

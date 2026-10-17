@@ -7,8 +7,9 @@ Schattierung sind eigene Arbeit. Weil das Skelett gleich bleibt, passen alle Ani
 
 | Datei | Inhalt | Dreiecke | Größe |
 | --- | --- | --- | --- |
-| `abenteurerin.glb` | Blonde Abenteurerin nach dem Referenzbild: weißes Oberteil mit Lederkorsett, weiße Hose mit Stoffbahn, Gürtel mit Schnalle und Taschen, Brustriemen, Schulterstück links, Armschienen, fingerlose Handschuhe, Stiefel mit Stoffstulpen, lange Haare, Stirnband mit Brille | ca. 29.800 | 1,3 MB |
+| `abenteurerin.glb` | Blonde Abenteurerin nach dem Referenzbild: weißes Oberteil mit Lederkorsett, weiße Hose mit blauer Stoffbahn mit Goldborte, Gürtel mit Schnalle und Taschen, Brustriemen, Schulterstück links, Armschienen, fingerlose Handschuhe, Stiefel mit Stoffstulpen, lange Haare, Stirnband mit Brille | ca. 29.800 | 2,8 MB |
 | `vergleich.jpg` | Referenzbild, Blender-Bilder und Spielansicht nebeneinander | – | – |
+| `vergleich-details.jpg` | Spielansicht vor und nach den gemalten Details | – | – |
 
 Teile (Meshes) in `abenteurerin.glb`, einzeln ausblendbar über `hide` in `client/figuren.js`:
 `Body` (Haut, Augen, Brauen), `Outfit` (alle Kleidung), `Hair` (Haare), `Headgear` (Stirnband und Brille).
@@ -24,7 +25,11 @@ Claude-Sitzung in der Cloud (dort als Python-Modul `bpy`, ohne Bildschirm).
    Bewegungsgewichte des Körpers und bewegt sich sauber mit. Riemen, Schnalle, Taschen, Schulterstück, Stirnband,
    Brille und die langen Haarsträhnen entstehen aus einfachen Formen. Verdeckte Haut wird entfernt.
 3. `tools/blender/export.py` fasst alles zu vier Teilen zusammen, berechnet weiche Schatten in Falten und unter
-   Riemen (als Punktfarben, kostet im Spiel nichts) und exportiert eine `.glb`.
+   Riemen (als Punktfarben, kostet im Spiel nichts) und backt die gemalten Details in Texturen
+   (`tools/blender/details.py`): Leinengewebe, Ledermaserung, Steppnähte am Rand, abgenutzte Lederkanten,
+   Goldborte, Haarsträhnen. Die Muster entstehen als Shader in Blender und werden pro Teil in ein Farbbild
+   und ein Reliefbild gebacken. Im Spiel kostet das nur zwei Bilder statt einfarbiger Flächen.
+   Augen sind gegenüber dem Grundkörper etwa 16 % größer (in `build.py` oben, `EYE_SCALE`).
 4. `tools/figuren/skelett.mjs` setzt die Figur auf das Original-Skelett, damit die Animationen exakt passen.
 
 Alles auf einmal: `QUATERNIUS=<quellordner> sh tools/blender/bauen.sh` (Voraussetzungen stehen oben im Skript).
