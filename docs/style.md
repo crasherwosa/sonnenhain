@@ -6,6 +6,7 @@
 - **Licht malt die Stimmung.** Jede Szene hat eine klare Lichtrichtung: warme Sonne (Gold, Pfirsich) gegen kühle Schatten und Ferne (Blau, Flieder). Gegenlicht ist der Lieblingsblick: Gras und Blätter leuchten an den Spitzen auf.
 - **Tiefe in Schichten.** Vordergrund kräftig und dunkler, Mitte satt, Hintergrund blass und bläulich im Dunst. Zwischen den Schichten liegen Nebelbänder.
 - **Lesbarkeit vor Detail:** Silhouetten müssen aus der Kameraentfernung (ca. 8–12 m) klar erkennbar sein. Viel Detail aus der Nähe, ruhige große Formen aus der Ferne.
+- **Vorbildbilder:** Fünf Bilder aus Guild Wars 3 liegen im Projektordner unter `referenz/gw3/` (nicht im Repository, weil sie urheberrechtlich geschützt sind).
 - **Kräftige Akzente nur für Wichtiges:** Magie und Kreaturen leuchten türkis oder gold, Beute golden, Gefahr rot.
 
 ## Umgebung
