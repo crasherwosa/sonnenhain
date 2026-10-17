@@ -50,9 +50,10 @@ Erkenntnisse aus den Guild-Wars-3-Bildern:
 
 ## Leistung
 
-- „Ultra“ (Mac): alles an, inklusive Nebelbänder, Lichtstrahlen und Unschärfe in der Ferne.
-- „Hoch“: Nebel, Pollen und Gegenlicht an, keine Unschärfe.
-- „Mittel“ (iPhone): weniger Gras und Pollen, kein Wind, einfacher Dunst. Die Stimmung (Farben, Licht) bleibt gleich.
+- „Ultra“ (Mac): alles an, inklusive Lichtstrahlen und Filmkorn. Unschärfe in der Ferne ist geplant.
+- „Hoch“: wie Ultra, aber weniger Gras und Pflanzen.
+- „Mittel“ (iPhone): weniger Gras, kein Wind, keine Lichtstrahlen, kein Filmkorn. Nebelbänder, Farben und Licht bleiben gleich, weil sie fast nichts kosten.
+- Die Tageszeit („Goldene Stunde“ oder „Mittag“) wählt man auf dem Startbildschirm.
 
 ## Benutzeroberfläche
 

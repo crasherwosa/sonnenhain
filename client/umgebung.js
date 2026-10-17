@@ -344,10 +344,10 @@ export function buildUndergrowth(ctx){
    Painted cumulus clouds: camera-facing cards, lit from above, silver edges toward the sun
    ========================================================= */
 export function buildCloudCards(ctx){
-  const { scene, sunDir, isTouch, MAXANISO, SKY } = ctx;
+  const { scene, sunDir, isTouch, MAXANISO, SKY, MOOD } = ctx;
   const tex = toTex(makeCloudAtlas(isTouch ? 1024 : 2048), MAXANISO, false);
   const mat = new THREE.ShaderMaterial({
-    uniforms: { map: { value: tex }, uSun: { value: sunDir }, uLit: { value: new THREE.Color(1.08, 1.04, 0.98) }, uShade: { value: new THREE.Color(0.6, 0.68, 0.82) }, uHaze: { value: SKY.hor } },
+    uniforms: { map: { value: tex }, uSun: { value: sunDir }, uLit: { value: new THREE.Color(...MOOD.cloudLit) }, uShade: { value: new THREE.Color(...MOOD.cloudShade) }, uRim: { value: new THREE.Color(...MOOD.cloudRim) }, uHaze: { value: SKY.hor } },
     vertexShader: `varying vec2 vUv; varying vec3 vDir;
       void main(){ vUv = uv;
         vec3 c = (modelMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
@@ -355,11 +355,11 @@ export function buildCloudCards(ctx){
         vec3 wp = c + right * position.x * length(modelMatrix[0].xyz) + vec3(0.0, 1.0, 0.0) * position.y * length(modelMatrix[1].xyz);
         vDir = normalize(wp - cameraPosition);
         gl_Position = projectionMatrix * viewMatrix * vec4(wp, 1.0); }`,
-    fragmentShader: `uniform sampler2D map; uniform vec3 uSun, uLit, uShade, uHaze; varying vec2 vUv; varying vec3 vDir;
+    fragmentShader: `uniform sampler2D map; uniform vec3 uSun, uLit, uShade, uRim, uHaze; varying vec2 vUv; varying vec3 vDir;
       void main(){ vec4 t = texture2D(map, vUv); if (t.a < 0.01) discard;
         float s = max(dot(vDir, uSun), 0.0);
         vec3 col = mix(uShade, uLit, t.r);
-        col += vec3(1.0, 0.86, 0.66) * pow(s, 5.0) * (1.0 - t.a * 0.7) * 0.9;
+        col += uRim * pow(s, 5.0) * (1.0 - t.a * 0.7) * 0.9;
         col = mix(col, uHaze, smoothstep(0.22, 0.02, vDir.y) * 0.55);
         gl_FragColor = vec4(col, t.a * 0.96); }`,
     transparent: true, depthWrite: false, fog: false, side: THREE.DoubleSide,
