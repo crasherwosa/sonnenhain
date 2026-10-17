@@ -8,7 +8,7 @@
 
 ## Figuren
 
-- **Spielfiguren und Menschen:** eigene Figuren aus Blender auf dem Quaternius-Grundkörper (CC0) mit echten Proportionen, ca. 1,70–1,80 m groß. Erste eigene Figur: die Abenteurerin (Sternenweberin), `assets/characters/eigene/`. Die fertigen Quaternius-Outfits bleiben vorerst für die übrigen Klassen und werden nach und nach ersetzt.
+- **Spielfiguren und Menschen:** eigene Figuren aus Blender auf dem Quaternius-Grundkörper (CC0) mit echten Proportionen, ca. 1,70–1,80 m groß. Alle sechs Figuren (Sternenweberin, Klingenwächter, Waldläufer, Schattenklinge, Bärenherz, Mira) und ihre Waffen sind eigene Arbeit: Baukasten `tools/blender/figurlib.py`, ein Rezept pro Figur in `tools/blender/figuren/`, Waffen in `tools/blender/waffen.py`, fertige Modelle in `assets/characters/eigene/`. Die fertigen Quaternius-Outfits werden für die Klassen nicht mehr verwendet.
 - **Sauberer, ruhiger Look:** klare Formen und einfarbige Flächen (Stoff, Leder, Messing) statt unruhiger Fototexturen. Tiefe entsteht durch weiche, eingebackene Schatten in Falten, an Kanten und unter Riemen. Jedes Kleidungsstück hat eine sichtbare Kante (Saum), Ränder sind geglättet.
 - **Haut:** hell und warm (Pfirsich), weich gemalt; Gesicht freundlich, ohne harte Details.
 - **Kleidung:** helle Stoffe (Weiß, Creme, gedecktes Grün) mit braunem Leder, Riemen, Schnallen und Armschienen. Metall sparsam (Schulterstück, Beschläge).

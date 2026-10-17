@@ -1,45 +1,49 @@
-# Eigene Figuren
+# Eigene Figuren und Waffen
 
-Figuren, die wir selbst in Blender bauen. Grundlage ist der Körper samt Skelett aus den
-Quaternius Universal Base Characters (CC0). Kleidung, Haare, Ausrüstung, Hautfarbe und
-Schattierung sind eigene Arbeit. Weil das Skelett gleich bleibt, passen alle Animationen aus
-`../quaternius/animationen/ual.glb`.
+Alle Spielfiguren und ihre Waffen bauen wir selbst in Blender, im Stil von Guild Wars 3 (siehe `docs/style.md`).
+Grundlage ist der Körper samt Skelett aus den Quaternius Universal Base Characters (CC0, Frau und Mann).
+Kleidung, Rüstung, Haare, Hautfarbe, Waffen und alle Texturen sind eigene Arbeit. Weil das Skelett gleich bleibt,
+passen alle Animationen aus `../quaternius/animationen/ual.glb`.
 
-| Datei | Inhalt | Dreiecke | Größe |
+| Datei | Klasse | Farben | Inhalt |
 | --- | --- | --- | --- |
-| `abenteurerin.glb` | Blonde Abenteurerin nach dem Referenzbild: weißes Oberteil mit Lederkorsett, weiße Hose mit türkiser Stoffbahn mit Goldborte, Gürtel mit Schnalle und Taschen, Brustriemen, Schulterstück links, Armschienen, fingerlose Handschuhe, Stiefel mit Stoffstulpen, lange Haare, Stirnband mit Brille | ca. 15.600 | 1,3 MB |
-| `vergleich.jpg` | Referenzbild, Blender-Bilder und Spielansicht nebeneinander | – | – |
-| `vergleich-details.jpg` | Spielansicht vor und nach den gemalten Details | – | – |
+| `sternenweberin.glb` | Magierin | Creme und Türkis | Blonde Abenteurerin nach dem Referenzbild: Oberteil mit türkiser Borte, Lederkorsett, gravierte Goldschulter, Stoffbahnen vorne und hinten, Armschienen mit Goldband, Stiefel mit Stulpen, Goldreif mit Stein |
+| `klingenwaechter.glb` | Krieger | Rot und Bronze | Roter Wams, gravierter Brustpanzer, Schulterplatten, Armschienen, Plattenschurz, Beinschienen, roter Waffenrock mit Bronzeborte, Bart |
+| `waldlaeufer.glb` | Waldläufer | Grün und Leder | Kapuze, Schulterumhang mit Goldborte, Lederweste mit Nieten, Köcher mit Pfeilen, Armschienen, hohe Stiefel, Bart |
+| `schattenklinge.glb` | Schurkin | Violett und Silber | Kapuze mit Umhang, Gesichtstuch, Lederwams, Silberschulter, Armschienen mit Silberbändern, Dolchscheiden, viele Riemen |
+| `baerenherz.glb` | Barbar | Fell und Eisen | Bärenfellumhang, Ledergeschirr, Eisenschulter und -armschienen, Lederschurz mit Eisenplatten, lange rote Haare, Vollbart |
+| `mira.glb` | Bäuerin (NPC) | Leinen und Grün | Leinenbluse, geschnürtes grünes Mieder, langer Rock, Schürze mit Borte, Haarband, Dutt |
+| `waffen/*.glb` | – | – | Schwert, Schild, Stab, Bogen, Dolch, Zweihandaxt: schlank, mit Bronze-, Gold- oder Silberbeschlägen |
+| `alle-figuren.jpg` | – | – | Vorher und jetzt im Vergleich |
 
-Teile (Meshes) in `abenteurerin.glb`, einzeln ausblendbar über `hide` in `client/figuren.js`:
-`Body` (Haut, Augen, Brauen), `Outfit` (alle Kleidung), `Hair` (Haare), `Headgear` (Stirnband und Brille).
+Jede Figur hat höchstens ca. 15.000 Dreiecke und Texturen von höchstens 1024 × 1024 Pixeln (iPhone), jede Waffe unter
+1.000 Dreiecke. Teile (Meshes) einer Figur: `Body` (Haut, Augen, Brauen), `Outfit` (Kleidung und Rüstung), `Hair`
+(Haare und Bart), bei manchen `Headgear` (Reif); einzeln ausblendbar über `hide` in `client/figuren.js`.
 
-## So entsteht die Figur
+## So entstehen die Figuren
 
-Alles läuft als Python-Skript in Blender, ohne Klicken. Das geht auf dem Mac genauso wie in einer
-Claude-Sitzung in der Cloud (dort als Python-Modul `bpy`, ohne Bildschirm).
+Alles läuft als Python-Skript in Blender, ohne Klicken. Das geht auf dem Mac genauso wie in einer Claude-Sitzung in der
+Cloud (dort als Python-Modul `bpy`, ohne Bildschirm).
 
-1. `tools/blender/textures.py` macht aus der Quaternius-Hauttextur eine hellere, saubere Haut ohne Unterwäsche.
-2. `tools/blender/build.py` lädt den Grundkörper und baut die Kleidung: Jedes Kleidungsstück wird aus der
-   Körperoberfläche ausgeschnitten, geglättet, nach außen geschoben und bekommt eine Kante. So erbt es die
-   Bewegungsgewichte des Körpers und bewegt sich sauber mit. Riemen, Schnalle, Taschen, Schulterstück, Stirnband,
-   Brille und die langen Haarsträhnen entstehen aus einfachen Formen. Verdeckte Haut wird entfernt.
-3. `tools/blender/export.py` fasst alles zu vier Teilen zusammen, berechnet weiche Schatten in Falten und unter
-   Riemen (als Punktfarben, kostet im Spiel nichts) und backt die gemalten Details in Texturen
-   (`tools/blender/details.py`): Leinengewebe, Ledermaserung, Steppnähte am Rand, abgenutzte Lederkanten,
-   Goldborte, Haarsträhnen. Die Muster entstehen als Shader in Blender und werden pro Teil in ein Farbbild
-   und ein Reliefbild gebacken. Im Spiel kostet das nur zwei Bilder statt einfarbiger Flächen.
-   Augen sind gegenüber dem Grundkörper etwa 16 % größer (in `build.py` oben, `EYE_SCALE`).
-   Fürs iPhone wird danach vereinfacht (Ziel ca. 15.000 Dreiecke, Texturen höchstens 1024 Pixel, siehe
-   Stil-Anweisung): der Körper vorab, wobei das Gesicht fein bleibt; Kleidung und Haare erst nach dem Backen,
-   damit die Details auf dem feinen Netz entstehen.
-4. `tools/figuren/skelett.mjs` setzt die Figur auf das Original-Skelett, damit die Animationen exakt passen.
+1. Rezept: `tools/blender/figuren/<name>.py` beschreibt eine Figur in wenigen Zeilen (Farben, Kleidungsstücke, Rüstungsteile,
+   Haare). Die Bausteine stehen in `tools/blender/figurlib.py`: Kleidung wird aus der Körperoberfläche ausgeschnitten und
+   erbt so die Bewegungsgewichte; Platten werden geglättet und gewölbt; dazu Stoffbahnen, Umhänge, Röcke, Kapuzen, Riemen,
+   Taschen, Schulterstücke, Reife und Haarsträhnen. Maße stehen im Raum des Frauenkörpers und werden für den Männerkörper
+   über die Gelenkpunkte umgerechnet.
+2. Haut: `tools/blender/textures.py` macht aus der Quaternius-Hauttextur eine saubere Haut ohne Unterwäsche, im Hautton der Figur.
+3. Export: `tools/blender/export.py` fasst die Teile zusammen und backt die gemalten Details in Texturen
+   (`tools/blender/details.py`): Stoffgewebe mit Mustern am Saum, Ledermaserung mit Nähten und abgenutzten Kanten,
+   graviertes Metall mit polierten Kanten und Beschlägen, Fell, Haarsträhnen. Danach wird auf ca. 15.000 Dreiecke
+   vereinfacht (Gesicht und kleine Teile bleiben fein) und es werden weiche Schatten in die Punktfarben gerechnet.
+4. Skelett: `tools/figuren/skelett.mjs` setzt die Figur auf das Original-Skelett, damit die Animationen exakt passen.
 
-Alles auf einmal: `QUATERNIUS=<quellordner> sh tools/blender/bauen.sh` (Voraussetzungen stehen oben im Skript).
-Der Quellordner braucht `base/`, `hair/` und `textures/` aus den Quaternius-Paketen (kostenlos bei itch.io,
-oder die Kopie, die in `../quaternius/README.md` beschrieben ist).
+Alles auf einmal: `QUATERNIUS=<quellordner> sh tools/blender/bauen.sh` (alle Figuren) oder mit Namen, z. B.
+`sh tools/blender/bauen.sh mira`. Waffen: `python tools/blender/waffen.py [schwert schild stab bogen dolch axt]`.
+Der Quellordner braucht `base/`, `hair/` und `textures/` aus den Quaternius-Paketen (kostenlos bei itch.io, oder die
+Kopie, die in `../quaternius/README.md` beschrieben ist).
 
-Neue Farben, Teile oder Formen: in `tools/blender/build.py` ändern (Farben stehen oben in `C`) und neu bauen.
+Neue Farben oder Teile: im Rezept der Figur ändern und neu bauen. Eine neue Figur: ein Rezept kopieren, anpassen und in
+`client/figuren.js` eintragen.
 
 ## Lizenz
 

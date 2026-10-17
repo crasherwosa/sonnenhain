@@ -20,8 +20,10 @@ def add_edge_attr(o):
     bm = bmesh.new(); bm.from_mesh(o.data)
     rim = set()
     for e in bm.edges:
-        if e.is_boundary or (len(e.link_faces) == 2 and e.calc_face_angle(0) > 1.0):
-            rim.update(e.verts)
+        if e.is_boundary: rim.update(e.verts)
+    if not rim:   # geschlossene Teile (Platten, Bahnen mit Dicke): scharfe Kanten zählen als Rand
+        for e in bm.edges:
+            if len(e.link_faces) == 2 and e.calc_face_angle(0) > 1.0: rim.update(e.verts)
     a = o.data.attributes.get('edge') or o.data.attributes.new('edge', 'FLOAT', 'POINT')
     w = o.data.attributes.get('wide') or o.data.attributes.new('wide', 'FLOAT', 'POINT')
     if not rim:
@@ -83,6 +85,7 @@ class N:
 
 
 def detail_shader(mat, kind):
+    saum = tuple(mat['saum']) + (1,) if 'saum' in mat else None
     """Ersetzt die Grundfarbe durch eine gemusterte Farbe und gibt (farbe, höhe) zurück."""
     g = N(mat)
     b = mat.node_tree.nodes['Principled BSDF']
@@ -116,6 +119,17 @@ def detail_shader(mat, kind):
         col = g.mix(g.math('MULTIPLY', hem, 0.35), col, dark)
         stitch_band = g.band(edge, 0.006, 0.009, 0.0008)
         thread = tuple(c * 0.62 for c in base[:3]) + (1,)
+        if saum is not None:
+            # gewebte Borte am Rand: zwei Töne im Rautenmuster, innen eine feine Linie
+            bd = g.band(edge, 0.003, 0.016, 0.0012)
+            ck2 = g.n('ShaderNodeTexChecker', Scale=1.0); g.link(scaled((110, 110, 110)), ck2.inputs['Vector'])
+            dark_s = tuple(c * 0.6 for c in saum[:3]) + (1,)
+            pat = g.mix(ck2.outputs['Fac'], saum, dark_s)
+            col = g.mix(bd, col, pat)
+            ln = g.band(edge, 0.019, 0.0215, 0.0006)
+            col = g.mix(ln, col, saum)
+            height = g.math('ADD', height, g.math('MULTIPLY', bd, 0.5))
+            stitch_band = g.band(edge, 0.025, 0.028, 0.0006)
         if kind == 'trim':
             # goldene Borte am Rand, Naht innen daneben
             gold = (0.78, 0.52, 0.16, 1)
@@ -137,7 +151,7 @@ def detail_shader(mat, kind):
         height = grain.outputs[0]
         stitch_band = g.band(edge, 0.0045, 0.0075, 0.0006)
         thread = (0.78, 0.66, 0.46, 1)   # helles Garn
-    elif kind == 'hair':
+    elif kind in ('hair', 'wood'):
         # Strähnen: Rauschen stark in die Länge gezogen, dunklere Ansätze
         st = g.n('ShaderNodeTexNoise', Scale=1.0, Detail=8.0, Roughness=0.7); g.link(scaled((90, 90, 3)), st.inputs['Vector'])
         cr = g.n('ShaderNodeValToRGB'); g.link(st.outputs['Fac'], cr.inputs[0])
@@ -146,9 +160,42 @@ def detail_shader(mat, kind):
         col = g.mix(0.6, base, cr.outputs['Color'])
         sep = g.n('ShaderNodeSeparateXYZ'); g.link(tc, sep.inputs[0])
         root = g.n('ShaderNodeMapRange'); g.link(sep.outputs['Z'], root.inputs[0])
-        root.inputs[1].default_value = 1.62; root.inputs[2].default_value = 1.78
+        rz = mat.get('root', (1.62, 1.78) if kind == 'hair' else (90.0, 91.0)); root.inputs[1].default_value = rz[0]; root.inputs[2].default_value = rz[1]
         col = g.mix(g.math('MULTIPLY', root.outputs[0], 0.3), col, dark)
         height = st.outputs['Fac']
+        stitch_band = None
+    elif kind in ('plate', 'gold'):
+        # Graviertes Metall: Rankenmuster in der Fläche, Rille und polierte Kante am Rand,
+        # bei Platten mit Schmuckfarbe (saum) ein Beschlag am Rand
+        wv = g.n('ShaderNodeTexWave', _wave_type='RINGS', Scale=34.0 if kind == 'plate' else 60.0, Distortion=5.0, Detail=3.0, **{'Detail Scale': 1.5}); g.link(tc, wv.inputs['Vector'])
+        line = g.band(wv.outputs['Fac'], 0.46, 0.54, 0.03)
+        area = g.n('ShaderNodeTexNoise', Scale=6.0, Detail=2.0); g.link(tc, area.inputs['Vector'])
+        amask = g.n('ShaderNodeMapRange', _interpolation_type='SMOOTHSTEP'); g.link(area.outputs['Fac'], amask.inputs[0])
+        amask.inputs[1].default_value = 0.45; amask.inputs[2].default_value = 0.55
+        inner = g.n('ShaderNodeMapRange'); g.link(edge, inner.inputs[0]); inner.inputs[1].default_value = 0.014; inner.inputs[2].default_value = 0.02
+        eng = g.math('MULTIPLY', g.math('MULTIPLY', line, amask.outputs[0]), inner.outputs[0])
+        col = g.mix(g.math('MULTIPLY', mott.outputs['Fac'], 0.25), base, light)
+        col = g.mix(g.math('MULTIPLY', eng, 0.7), col, tuple(c * 0.35 for c in base[:3]) + (1,))
+        groove = g.band(edge, 0.009, 0.012, 0.001)
+        col = g.mix(g.math('MULTIPLY', groove, 0.8), col, tuple(c * 0.4 for c in base[:3]) + (1,))
+        polish = g.band(edge, -1.0, 0.003, 0.002)
+        col = g.mix(g.math('MULTIPLY', polish, 0.5), col, (1, 1, 1, 1))
+        height = g.math('SUBTRACT', g.math('MULTIPLY', polish, 0.3), g.math('ADD', eng, groove))
+        if saum is not None:
+            trim = g.band(edge, -1.0, 0.0075, 0.001)
+            col = g.mix(trim, col, saum)
+            height = g.math('ADD', height, g.math('MULTIPLY', trim, 0.6))
+        stitch_band = None
+    elif kind == 'fur':
+        # Fell: Büschel (Voronoi) und feine Haare, Spitzen heller
+        st = g.n('ShaderNodeTexNoise', Scale=1.0, Detail=8.0, Roughness=0.7); g.link(scaled((140, 140, 12)), st.inputs['Vector'])
+        vo = g.n('ShaderNodeTexVoronoi', Scale=40.0); g.link(tc, vo.inputs['Vector'])
+        cr = g.n('ShaderNodeValToRGB'); g.link(st.outputs['Fac'], cr.inputs[0])
+        cr.color_ramp.elements[0].position = 0.3; cr.color_ramp.elements[0].color = dark
+        cr.color_ramp.elements[1].position = 0.75; cr.color_ramp.elements[1].color = light
+        col = g.mix(0.7, base, cr.outputs['Color'])
+        col = g.mix(g.math('MULTIPLY', vo.outputs['Distance'], 0.6), col, dark)
+        height = g.math('ADD', st.outputs['Fac'], g.math('MULTIPLY', vo.outputs['Distance'], -1.0))
         stitch_band = None
     else:   # Metall, Glas: nur leichte Unregelmäßigkeit
         col = g.mix(g.math('MULTIPLY', mott.outputs['Fac'], 0.3), base, dark if kind == 'metal' else light)
@@ -183,7 +230,7 @@ def bake_details(o, size, normal_size=None):
     kinds = {}
     keep = {}
     for i, m in enumerate(me.materials):   # eigene Kopie: dasselbe Material kann in mehreren Teilen stecken
-        c = m.copy(); c.name = o.name + '_' + m.name; me.materials[i] = c; kinds[c.name] = KIND.get(m.name, 'metal')
+        c = m.copy(); c.name = o.name + '_' + m.name; me.materials[i] = c; kinds[c.name] = m.get('kind') or KIND.get(m.name, 'metal')
     for m in me.materials:
         b = m.node_tree.nodes['Principled BSDF']
         keep[m.name] = (b.inputs['Roughness'].default_value, b.inputs['Metallic'].default_value)

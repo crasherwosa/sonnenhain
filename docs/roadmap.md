@@ -1,6 +1,6 @@
 # Fahrplan
 
-Stand: 16.10.2026
+Stand: 17.10.2026
 
 ## Erledigt
 
@@ -13,9 +13,9 @@ Stand: 16.10.2026
 
 - Erste eigene Figur aus Blender: die Sternenweberin ist jetzt eine selbst gebaute Abenteurerin nach dem Referenzbild (weißes Oberteil, Lederkorsett, Schulterstück, Armschienen, Stiefel mit Stulpen, lange blonde Haare, Stirnband mit Brille). Gebaut per Skript (`tools/blender/`) auf dem Quaternius-Grundkörper, mit allen bisherigen Animationen. Saubere einfarbige Flächen mit weichen eingebackenen Schatten statt unruhiger Texturen. Stil festgehalten in `docs/style.md`.
 
-## Erledigt: Details der Abenteurerin
+- Gemalte Details der Abenteurerin: Stoff- und Lederstruktur mit Nähten, Haarsträhnen, Farben nach der GW3-Stil-Anweisung, ca. 15.000 Dreiecke fürs iPhone.
 
-Gemalte Stoff- und Ledertextur mit Nähten, abgenutzte Lederkanten, Haarsträhnen, größere Augen, Farben nach der GW3-Stil-Anweisung (Creme, Rotbraun, Gold, türkise Stoffbahn). Vereinfacht auf ca. 15.600 Dreiecke und 1024er Texturen fürs iPhone. Siehe `assets/characters/eigene/vergleich-details.jpg`.
+- Alle Figuren im GW3-Stil selbst gebaut (`assets/characters/eigene/`): Sternenweberin, Klingenwächter, Waldläufer, Schattenklinge, Bärenherz und Mira, je mit Haupt- und Schmuckfarbe, Rüstung in Lagen (Stoff, Leder, graviertes Metall), gemalten Texturen und halbrealistischen Gesichtern. Dazu eigene schlanke Waffen (Schwert, Schild, Stab, Bogen, Dolche, Axt) statt der KayKit-Waffen. Baukasten `tools/blender/figurlib.py`, Rezepte in `tools/blender/figuren/`, Vergleich in `assets/characters/eigene/alle-figuren.jpg`.
 
 ## Als Nächstes
 
@@ -23,7 +23,7 @@ Gemalte Stoff- und Ledertextur mit Nähten, abgenutzte Lederkanten, Haarsträhne
 2. **Quests aus Daten:** Herz-Aufgabe aus `content/quests/` laden statt fest im Code.
 3. **Lore:** Weltgeschichte, Regionen und erste Kapitel in `docs/lore.md` ausarbeiten.
 4. **Klassen-Fertigkeiten:** je Klasse eigene Fertigkeiten (Schwert, Bogen, Dolche, Axt, Magie). Die Angriffs-Animationen je Klasse sind schon da (`client/figuren.js`).
-5. **Weitere eigene Figuren und Waffen:** mit `tools/blender/` auch Klingenwächter, Waldläufer, Schattenklinge, Bärenherz und Mira selbst bauen (männlicher Grundkörper liegt bei Quaternius bei). Schlanke Waffen, z. B. ein Stab passend zur Sternenweberin. Eigene Bogen- und Magie-Animationen fehlen noch.
+5. **Feinschliff der Figuren:** Ränder an Kapuzen und Handschuhen glätten, Rückseiten (Mira, Bärenherz) abwechslungsreicher, Schild und Bogen genauer in die Hand legen. Eigene Bogen- und Magie-Animationen fehlen noch. Gegner und weitere NPCs mit demselben Baukasten.
 6. **Gegner als KayKit-Figuren:** z. B. KayKit Skeletons; die Skelett-Animationen liegen bereits in `Rig_Medium_Special.glb`.
 
 ## Später

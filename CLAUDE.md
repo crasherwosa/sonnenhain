@@ -18,7 +18,7 @@ Sonnenhain ist ein stilisiertes Fantasy-Rollenspiel im Browser, inspiriert von G
 | Ordner | Inhalt |
 | --- | --- |
 | `client/` | Das Spiel. Statische Dateien, kein Build-Schritt. `client/index.html` ist der Einstieg. |
-| `client/figuren.js` | Lädt die Figuren (Quaternius mit echten Proportionen, KayKit für später), hängt Waffen an und steuert die Animationen. Welche Klasse welche Figur, Haarfarbe, Waffe und Angriffe hat, steht oben in der Datei. |
+| `client/figuren.js` | Lädt die Figuren (eigene Blender-Figuren auf dem Quaternius-Skelett, KayKit für später), hängt Waffen an und steuert die Animationen. Welche Klasse welche Figur, Waffe und Angriffe hat, steht oben in der Datei. |
 | `client/figuren.html` | Figurenschau: alle Klassen nebeneinander, Bewegungen per Knopf. Zum Prüfen neuer Figuren und Waffen. |
 | `client/vendor/three/` | three.js r160, lokal mitgeliefert (nur die benötigten Dateien). Nicht verändern. |
 | `assets/` | Modelle (`.glb`), später Sounds und Bilder. Regeln in `assets/README.md`. |
@@ -26,7 +26,7 @@ Sonnenhain ist ein stilisiertes Fantasy-Rollenspiel im Browser, inspiriert von G
 | `docs/` | Spieldesign, Lore, Stil, Fahrplan, Arbeitsweise. |
 | `prototype/` | Archivierte Prototyp-Versionen zum Nachschlagen. Nicht weiterentwickeln. |
 | `server/` | Später: Mehrspieler-Server (Node.js, WebSockets). |
-| `tools/` | Hilfsskripte: lokaler Server, automatischer Rauchtest, `figuren/bauen.mjs` zum Zusammensetzen der Quaternius-Figuren, `blender/` zum Bauen eigener Figuren, `figuren/skelett.mjs` setzt sie auf das Original-Skelett. |
+| `tools/` | Hilfsskripte: lokaler Server, automatischer Rauchtest, `figuren/bauen.mjs` zum Zusammensetzen der Quaternius-Figuren, `blender/` zum Bauen eigener Figuren (Baukasten `figurlib.py`, Rezepte in `figuren/`) und Waffen (`waffen.py`), `figuren/skelett.mjs` setzt sie auf das Original-Skelett. |
 
 ## Technische Regeln
 

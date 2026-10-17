@@ -1,17 +1,17 @@
 """Fasst die Teile zu wenigen Meshes zusammen, backt weiche Schatten (Umgebungsverdeckung)
-in die Punktfarben und exportiert eine .glb. Aufruf: python export.py <ziel.glb>"""
+in die Punktfarben und exportiert eine .glb. Aufruf: python export.py <figur.blend> <ziel.glb>"""
 import os, sys; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bpy
 from blib import ARBEIT
 from details import add_edge_attr, bake_details
 
-OUT = sys.argv[-1]
-bpy.ops.wm.open_mainfile(filepath=ARBEIT + '/figur.blend')
+SRC, OUT = sys.argv[-2], sys.argv[-1]
+bpy.ops.wm.open_mainfile(filepath=SRC)
 arm = bpy.data.objects['Armature']
 GROUPS = {
     'Body': lambda n: n in ('Body', 'Eyes', 'Eyebrows'),
-    'Hair': lambda n: n.startswith('Hair'),
-    'Headgear': lambda n: n.startswith(('Headband', 'Goggle')),
+    'Hair': lambda n: n.startswith(('Hair', 'Beard')),
+    'Headgear': lambda n: n.startswith(('Headband', 'Goggle', 'Kopf')),
 }
 def group_of(n):
     for g, f in GROUPS.items():
@@ -21,7 +21,7 @@ def group_of(n):
 # Fürs iPhone vereinfachen (Ziel: ca. 15.000 Dreiecke). Der Körper vorab (Gesicht bleibt fein),
 # Kleidung, Haare und Kopfschmuck erst nach dem Backen: die Details entstehen auf dem feinen Netz
 # und bleiben über die Texturkoordinaten erhalten. Kleine Teile und die flache Stoffbahn bleiben ganz.
-REDUCE = {'Outfit': 0.4, 'Hair': 0.36}
+ZIEL = 15000
 def decimate(o, r, group=None):
     d = o.modifiers.new('D', 'DECIMATE'); d.ratio = r
     if group: d.vertex_group = group; d.invert_vertex_group = True
@@ -30,7 +30,7 @@ def decimate(o, r, group=None):
     with bpy.context.temp_override(object=o): bpy.ops.object.modifier_apply(modifier='D')
 decimate(bpy.data.objects['Body'], 0.5, 'Head')
 for o in arm.children:
-    if o.type == 'MESH' and (o.name == 'Tabard' or len(o.data.polygons) < 150):
+    if o.type == 'MESH' and (o.name.startswith(('Tabard', 'Panel')) or len(o.data.polygons) < 150):
         o.vertex_groups.new(name='Behalten').add(list(range(len(o.data.vertices))), 1.0, 'REPLACE')
 
 parts = {}
@@ -55,8 +55,14 @@ for o in joined:
     if o.name in SIZES:
         img, nimg = bake_details(o, *SIZES[o.name]); print(o.name, 'gebacken', img.name, nimg.name if nimg else '-')
 arm.data.pose_position = 'POSE'
-for o in joined:
-    if o.name in REDUCE: decimate(o, REDUCE[o.name], 'Behalten' if 'Behalten' in o.vertex_groups else None)
+tris = lambda o: sum(len(p.vertices) - 2 for p in o.data.polygons)
+fixed = sum(tris(o) for o in joined if o.name in ('Body', 'Headgear'))
+red = [o for o in joined if o.name == 'Outfit' or (o.name == 'Hair' and tris(o) > 2500)]   # kurze Frisuren bleiben ganz
+fixed += sum(tris(o) for o in joined if o.name == 'Hair' and o not in red)
+r = min(1.0, (ZIEL - fixed) / max(1, sum(tris(o) for o in red)))
+print('Vereinfachen auf', round(r, 2))
+for o in red:
+    if r < 0.98: decimate(o, r, 'Behalten' if 'Behalten' in o.vertex_groups else None)
 for o in joined:
     if 'Behalten' in o.vertex_groups: o.vertex_groups.remove(o.vertex_groups['Behalten'])
 
