@@ -41,10 +41,18 @@ for (const skin of doc.getRoot().listSkins()) {
 // Der Armature-Knoten aus Blender bleibt ohne eigene Drehung
 for (const n of doc.getRoot().listNodes()) if (n.getName() === 'Armature') n.setTranslation([0, 0, 0]).setRotation([0, 0, 0, 1]).setScale([1, 1, 1]);
 
+// Haarsträhnen, Brauen, Wimpern: Durchsicht mit harter Kante (schnell, keine Sortierfehler)
+for (const m of doc.getRoot().listMaterials()) {
+  if (m.getName().startsWith('MASK_')) m.setAlphaMode('MASK').setAlphaCutoff(0.4).setDoubleSided(true);
+  else m.setAlphaMode('OPAQUE');
+}
+const mask = new Set(doc.getRoot().listMaterials().filter(m => m.getAlphaMode() === 'MASK').map(m => m.getBaseColorTexture()).filter(Boolean));
+for (const t of doc.getRoot().listTextures()) if (mask.has(t)) t.setName('MASK_' + t.getName().replace(/^MASK_/, ''));
 await doc.transform(
   prune({ keepLeaves: true }),
   dedup(),
-  textureCompress({ encoder: sharp, targetFormat: 'jpeg', resize: [1024, 1024], quality: 85 }),
+  textureCompress({ encoder: sharp, targetFormat: 'jpeg', resize: [1024, 1024], quality: 85, pattern: /^(?!MASK_)/ }),
+  textureCompress({ encoder: sharp, targetFormat: 'png', resize: [512, 512], pattern: /^MASK_/ }),
 );
 await io.write(OUT, doc);
 let tris = 0;

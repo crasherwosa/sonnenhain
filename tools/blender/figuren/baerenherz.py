@@ -118,13 +118,7 @@ for z0 in (0.17, 0.27):
     F.ring('BootStrap', z0, z0 + 0.015, 'leather2', 0.03, rim=0.006, smooth=2)
 
 # Langes rotbraunes Haar und Vollbart
-H = F.hair_mesh('Hair_Long', 'hair')
-# Hair_Long ist für den Frauenkopf gebaut: auf den Männerkopf setzen (Kopfgelenk 1,55 -> 1,60 m, etwas breiter)
-mw = H.matrix_world; inv = mw.inverted()
-for v in H.data.vertices:
-    p = mw @ v.co
-    p = Vector((p.x * 1.04, (p.y - 0.011) * 1.05 + 0.017, p.z - 1.55 + 1.6))
-    v.co = inv @ p
+H = F.frisur('long01', '#7e3a1c')   # Strähnen mit Durchsicht
 B = F.hair_mesh('Hair_Beard', 'hair', name='Beard')
 # lange Strähnen hinten über das Fell
 random.seed(11)

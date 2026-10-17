@@ -73,6 +73,7 @@ F.sleeve('ArmStrap', 0.26, 0.28, 'strap', 0.016, rim=0.006)
 # Schulterstück links: kleine gravierte Silberschale über Leder
 F.pauldron('l', ['silver', 'leather', 'leather2'], size=0.078, layers=3, z=1.43, tilt=-30, thick=0.007)
 # Kapuze und Gesichtstuch
+F.frisur('short01', '#2b1d18')   # kurze dunkle Haare unter der Kapuze
 hood = F.hood('Hood', 'hoodm', off=0.05, zlow=1.38)
 # Kapuze hinten etwas spitz ausziehen (klassische Kapuzenform)
 for v in hood.data.vertices:

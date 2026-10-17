@@ -179,7 +179,7 @@ def detail_shader(mat, kind):
         groove = g.band(edge, 0.009, 0.012, 0.001)
         col = g.mix(g.math('MULTIPLY', groove, 0.8), col, tuple(c * 0.4 for c in base[:3]) + (1,))
         polish = g.band(edge, -1.0, 0.003, 0.002)
-        col = g.mix(g.math('MULTIPLY', polish, 0.5), col, (1, 1, 1, 1))
+        col = g.mix(g.math('MULTIPLY', polish, 0.5), col, tuple(min(1.0, c * 1.5 + 0.08) for c in base[:3]) + (1,))   # polierte Kante, in der Metallfarbe
         height = g.math('SUBTRACT', g.math('MULTIPLY', polish, 0.3), g.math('ADD', eng, groove))
         if saum is not None:
             trim = g.band(edge, -1.0, 0.0075, 0.001)
@@ -248,7 +248,7 @@ def bake_details(o, size, normal_size=None):
             h = heights[m.name]
             b = m.node_tree.nodes['Principled BSDF']
             if h is not None:
-                bump = m.node_tree.nodes.new('ShaderNodeBump'); bump.inputs['Strength'].default_value = 0.35
+                bump = m.node_tree.nodes.new('ShaderNodeBump'); bump.inputs['Strength'].default_value = 0.7
                 bump.inputs['Distance'].default_value = 0.002
                 m.node_tree.links.new(h, bump.inputs['Height']); m.node_tree.links.new(bump.outputs['Normal'], b.inputs['Normal'])
             m.node_tree.nodes['BAKE'].image = nimg

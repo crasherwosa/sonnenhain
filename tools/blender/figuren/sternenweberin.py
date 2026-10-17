@@ -60,13 +60,8 @@ F.ring('Choker', 1.505, 1.528, 'leather2', 0.004, rim=0.004)
 import bpy
 F.bandolier('Bandolier', [bpy.data.objects['Top'], bpy.data.objects['Corset']], 'leather')
 
-# Haare: Quaternius-Langhaar plus lange, gewellte Strähnen
-H = F.hair_mesh('Hair_Long', 'hair')
-F.M['hair']['root'] = (1.62, 1.78)
-locks = [(a, 1.19 + 0.06 * random.random(), 0.05 + 0.01 * random.random()) for a in (104, 126, 148, 170, 190, 212, 234, 256)]
-locks += [(a, 1.25 + 0.04 * random.random(), 0.042) for a in (115, 137, 159, 180, 201, 223, 245)]
-locks += [(64, 1.27, 0.034), (296, 1.27, 0.034), (80, 1.31, 0.03), (280, 1.31, 0.03)]
-F.long_strands('HairLong', 'hair', locks, [bpy.data.objects['Top'], H])
+# Haare: lange Strähnen mit Durchsicht (MakeHuman long01), blond
+H = F.frisur('long01', '#e9c46e')
 
 # Goldreif mit türkisem Stein statt Brille
 ring, bv = F.circlet('KopfReif', 'gold', z=1.712, width=0.007, front_up=0.012, extra=[H])

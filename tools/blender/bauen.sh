@@ -5,6 +5,7 @@
 #   python3 -m venv ~/bvenv && ~/bvenv/bin/pip install bpy pillow scipy   (Blender als Python-Modul)
 #   cd tools/figuren && npm install
 #   Quaternius-Quelldateien in $QUATERNIUS (Aufbau: base/, hair/, textures/ – siehe assets/characters/eigene/README.md)
+#   MakeHuman in $MAKEHUMAN und $MAKEHUMAN_ASSETS (siehe tools/blender/makehuman.py)
 # Aufruf: QUATERNIUS=~/quaternius sh tools/blender/bauen.sh [name ...]   (ohne Namen: alle Figuren)
 set -e
 HIER=$(cd "$(dirname "$0")" && pwd)

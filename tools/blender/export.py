@@ -10,6 +10,7 @@ bpy.ops.wm.open_mainfile(filepath=SRC)
 arm = bpy.data.objects['Armature']
 GROUPS = {
     'Body': lambda n: n in ('Body', 'Eyes', 'Eyebrows'),
+    'Strands': lambda n: n.startswith('MASK_'),   # Strähnen, Brauen, Wimpern mit Durchsicht: nicht backen, nicht vereinfachen
     'Hair': lambda n: n.startswith(('Hair', 'Beard')),
     'Headgear': lambda n: n.startswith(('Headband', 'Goggle', 'Kopf')),
 }
@@ -28,7 +29,14 @@ def decimate(o, r, group=None):
     o.modifiers.move(len(o.modifiers) - 1, 0)
     bpy.context.view_layer.objects.active = o
     with bpy.context.temp_override(object=o): bpy.ops.object.modifier_apply(modifier='D')
-decimate(bpy.data.objects['Body'], 0.5, 'Head')
+body = bpy.data.objects['Body']
+bt = sum(len(p.vertices) - 2 for p in body.data.polygons)
+# Körper auf höchstens ca. 6.000 Dreiecke; das Gesicht (Gruppe Head) bleibt dabei feiner als der Rest
+d = body.modifiers.new('D', 'DECIMATE'); d.ratio = min(1.0, 6000 / bt); d.use_symmetry = True; d.symmetry_axis = 'X'
+d.vertex_group = 'Head'; d.invert_vertex_group = True; d.vertex_group_factor = 4.0
+body.modifiers.move(len(body.modifiers) - 1, 0)
+bpy.context.view_layer.objects.active = body
+with bpy.context.temp_override(object=body): bpy.ops.object.modifier_apply(modifier='D')
 for o in arm.children:
     if o.type == 'MESH' and (o.name.startswith(('Tabard', 'Panel')) or len(o.data.polygons) < 150):
         o.vertex_groups.new(name='Behalten').add(list(range(len(o.data.vertices))), 1.0, 'REPLACE')
@@ -50,16 +58,16 @@ for g, objs in parts.items():
 
 # Gemalte Details (Gewebe, Leder, Nähte, Strähnen) in Texturen backen, in Grundhaltung
 arm.data.pose_position = 'REST'
-SIZES = {'Outfit': (1024, 512), 'Hair': (512, 256), 'Headgear': (256, None)}   # höchstens 1024 Pixel
+SIZES = {'Outfit': (1024, 1024), 'Hair': (512, 256), 'Headgear': (256, None)}   # höchstens 1024 Pixel
 for o in joined:
     if o.name in SIZES:
         img, nimg = bake_details(o, *SIZES[o.name]); print(o.name, 'gebacken', img.name, nimg.name if nimg else '-')
 arm.data.pose_position = 'POSE'
 tris = lambda o: sum(len(p.vertices) - 2 for p in o.data.polygons)
-fixed = sum(tris(o) for o in joined if o.name in ('Body', 'Headgear'))
+fixed = sum(tris(o) for o in joined if o.name in ('Body', 'Headgear', 'Strands'))
 red = [o for o in joined if o.name == 'Outfit' or (o.name == 'Hair' and tris(o) > 2500)]   # kurze Frisuren bleiben ganz
 fixed += sum(tris(o) for o in joined if o.name == 'Hair' and o not in red)
-r = min(1.0, (ZIEL - fixed) / max(1, sum(tris(o) for o in red)))
+r = max(0.15, min(1.0, (ZIEL - fixed) / max(1, sum(tris(o) for o in red))))
 print('Vereinfachen auf', round(r, 2))
 for o in red:
     if r < 0.98: decimate(o, r, 'Behalten' if 'Behalten' in o.vertex_groups else None)
@@ -73,6 +81,7 @@ from mathutils.bvhtree import BVHTree
 random.seed(3)
 allbm = bmesh.new()
 for o in joined:
+    if o.name == 'Strands': continue   # Strähnen mit Durchsicht werfen keine weichen Schatten (sonst fleckige Haut)
     t = bmesh.new(); t.from_mesh(o.data); me = bpy.data.meshes.new('t'); t.to_mesh(me); t.free(); allbm.from_mesh(me)
 BV = BVHTree.FromBMesh(allbm)
 DIRS = []
@@ -86,7 +95,7 @@ for o in joined:
     ca = me.color_attributes.new('AO', 'BYTE_COLOR', 'POINT')
     me.color_attributes.active_color = ca
     me.color_attributes.render_color_index = me.color_attributes.active_color_index
-    floor = {'Body': 0.78, 'Hair': 0.74}.get(o.name, 0.55)
+    floor = {'Body': 0.78, 'Hair': 0.74, 'Strands': 0.7}.get(o.name, 0.55)
     tot = 0
     for v in me.vertices:
         n = v.normal
@@ -107,7 +116,7 @@ bpy.ops.object.select_all(action='DESELECT')
 for o in joined: o.select_set(True)
 arm.select_set(True)
 bpy.ops.export_scene.gltf(filepath=OUT, export_format='GLB', use_selection=True, export_animations=False,
-                          export_vertex_color='ACTIVE', export_image_format='JPEG', export_jpeg_quality=86,
+                          export_vertex_color='ACTIVE', export_image_format='AUTO',
                           export_yup=True, export_skins=True, export_rest_position_armature=True)
 for o in joined:
     print(o.name, sum(len(p.vertices) - 2 for p in o.data.polygons), 'Dreiecke', [m.name for m in o.data.materials])

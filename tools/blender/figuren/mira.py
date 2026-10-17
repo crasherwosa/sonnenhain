@@ -132,8 +132,8 @@ F.pouch(-95, (0.04, 0.03, 0.05), 0.955, 'leather2')
 F.ring('Neckband', 1.505, 1.522, 'green2', 0.003, rim=0.004, filt=lambda p: abs(p.x) < 0.12)
 F.sleeve('ArmBand', 0.33, 0.35, 'green2', lambda p: blouse_off(p) + 0.005, rim=0.005)
 
-# Haare: Knoten, darüber ein grüner Stoff-Haarreif
-H = F.hair_mesh('Hair_Buns', 'hair')
+# Haare: Zopf aus Strähnen mit Durchsicht, darüber ein grüner Stoff-Haarreif
+H = F.frisur('Braid01', '#6e4126')
 F.M['hair']['root'] = (1.62, 1.78)
 bv = F.head_bvh([H])
 def headband(name, material, width=0.016, tilt=22, off=0.005, k=40, span=105):

@@ -56,8 +56,69 @@ SKIN_TEX = {'female': 'd366843ee7d9e9f37ec87a0e1c98c7f2e45573c08eeb80a51a6d9344e
 EYE_TEX = 'd08e3356a83211bc6ca21fe3a8e39f4b5c1a3b8f85457fc2c0fb57be09935025.png'
 
 
+# Gesichtszüge für die MakeHuman-Körper: etwas größere Augen, klarere Wangenknochen (halbrealistisch wie GW)
+GESICHT = {
+    'female': {'head/head-oval': 0.4, 'chin/chin-width-decr': 0.3, 'mouth/mouth-upperlip-volume-incr': 0.3,
+               'mouth/mouth-lowerlip-volume-incr': 0.25, 'cheek/l-cheek-bones-incr': 0.3, 'cheek/r-cheek-bones-incr': 0.3,
+               'nose/nose-scale-horiz-decr': 0.2, 'nose/nose-point-width-decr': 0.25},
+    'male': {'head/head-square': 0.3, 'chin/chin-prominent-incr': 0.3, 'chin/chin-width-incr': 0.2,
+             'cheek/l-cheek-bones-incr': 0.3, 'cheek/r-cheek-bones-incr': 0.3, 'neck/neck-scale-horiz-incr': 0.3},
+}
+FORM = {'female': (0.7, 0.35), 'male': (0.75, 0.45)}   # Muskeln, Gewicht (0..1)
+
+
+def pack_uv(bm, uvl, big, factor, margin=0.006):
+    """UV-Inseln neu anordnen: Inseln, für die big(face) gilt, werden factor-mal größer. Einfaches Regalpacken."""
+    seen, islands = set(), []
+    key = lambda l: (l.vert.index, round(l[uvl].uv.x, 5), round(l[uvl].uv.y, 5))
+    loops_at = {}
+    for f in bm.faces:
+        for l in f.loops: loops_at.setdefault(key(l), []).append(f)
+    for f0 in bm.faces:
+        if f0.index in seen: continue
+        isl, stack = [], [f0]; seen.add(f0.index)
+        while stack:
+            f = stack.pop(); isl.append(f)
+            for l in f.loops:
+                for g in loops_at[key(l)]:
+                    if g.index not in seen: seen.add(g.index); stack.append(g)
+        islands.append(isl)
+    rects = []
+    for isl in islands:
+        k = factor if sum(big(f) for f in isl) * 2 >= len(isl) else 1.0
+        us = [l[uvl].uv.copy() for f in isl for l in f.loops]
+        x0, y0 = min(u.x for u in us), min(u.y for u in us)
+        w, h = max(u.x for u in us) - x0, max(u.y for u in us) - y0
+        rects.append((isl, k, x0, y0, w * k, h * k))
+    order = sorted(range(len(rects)), key=lambda i: -rects[i][5])
+    def place(sc):
+        pos, x, y, row = {}, margin, margin, 0
+        for i in order:
+            w, h = rects[i][4] * sc, rects[i][5] * sc
+            if x + w + margin > 1: x, y, row = margin, y + row + margin, 0
+            pos[i] = (x, y); x += w + margin; row = max(row, h)
+        return pos if y + row + margin <= 1 else None
+    lo, hi = 0.1, 4.0
+    for _ in range(30):
+        mid = (lo + hi) / 2
+        if place(mid): lo = mid
+        else: hi = mid
+    pos = place(lo)
+    for i, (isl, k, x0, y0, w, h) in enumerate(rects):
+        px, py = pos[i]
+        done = set()
+        for f in isl:
+            for l in f.loops:
+                if id(l) in done: continue
+                u = l[uvl].uv
+                l[uvl].uv = Vector((px + (u.x - x0) * k * lo, py + (u.y - y0) * k * lo))
+
+
 class Figur:
-    def __init__(self, name, base='female', skin='#f6c9a8', eye_scale=1.05, seed=7):
+    def __init__(self, name, base='female', skin='#f6c9a8', eye_scale=1.05, seed=7,
+                 koerper='makehuman', form=None, gesicht=None, augen='brownlight'):
+        """koerper: 'makehuman' (realistischer Körper mit Gesicht, Standard) oder 'quaternius' (alter Körper).
+        form: (Muskeln, Gewicht) 0..1; gesicht: zusätzliche MakeHuman-Formen {Name: Stärke}; augen: Augenfarbe."""
         self.name, self.base = name, base
         self.out = os.path.join(ARBEIT, name) + '/'
         os.makedirs(self.out, exist_ok=True)
@@ -74,13 +135,153 @@ class Figur:
         self.male = base == 'male'
         self.cover = []
         self.M = {}
-        self._grow_eyes(eye_scale)
-        self.refresh_body()
-        # Haut aus textures.py (eigene Hautfarbe je Figur)
+        self.mh = None
+        self.lashes = None
+        if koerper == 'makehuman':
+            self._makehuman(form or FORM[base], {**GESICHT[base], **(gesicht or {})}, eye_scale, skin, augen)
+        else:
+            self._grow_eyes(eye_scale)
+            self.refresh_body()
+            from textures import make_skin
+            skin_png = make_skin(Q + 'textures/' + SKIN_TEX[base], self.out + 'skin.png', skin)
+            self.M['skin'] = self._tex_mat('M_skin', skin_png, 0.6)
+            self.M['eyes'] = self._tex_mat('M_eyes', Q + 'textures/' + EYE_TEX, 0.25)
+
+    def _makehuman(self, form, gesicht, eye_scale, skin, augen):
+        """Quaternius-Körper gegen einen MakeHuman-Körper tauschen (gleiche Gelenke, gleiche Gewichte)."""
+        from makehuman import Mensch, macro, MHA
         from textures import make_skin
-        skin_png = make_skin(Q + 'textures/' + SKIN_TEX[base], self.out + 'skin.png', skin)
-        self.M['skin'] = self._tex_mat('M_skin', skin_png, 0.6)
-        self.M['eyes'] = self._tex_mat('M_eyes', Q + 'textures/' + EYE_TEX, 0.25)
+        top = max(v.co.z for v in self.body.data.vertices)
+        g = 'male' if self.male else 'female'
+        eyes = {f'eyes/{s}-eye-scale-incr': (eye_scale - 1) * 4 for s in 'lr'} if eye_scale > 1 else {}
+        H = Mensch(macro(g, form[0], form[1], extra={**gesicht, **eyes}))
+        H.scale_to(top); H.fit(self.arm)
+        self.mh = H
+        qbody = self.body
+        bm = bmesh.new(); bm.from_mesh(qbody.data); self.QBODY = BVHTree.FromBMesh(bm); bm.free()
+        print('Kopf angepasst (Kinn Q, Kinn MH, Faktor):', H.fit_head(self.QBODY, top))
+        body = H.mesh('MHBody')
+        self._attach(body)
+        dt = body.modifiers.new('DT', 'DATA_TRANSFER'); dt.object = qbody
+        dt.use_vert_data = True; dt.data_types_verts = {'VGROUP_WEIGHTS'}; dt.vert_mapping = 'POLYINTERP_NEAREST'
+        dt.layers_vgroup_select_src = 'ALL'; dt.layers_vgroup_select_dst = 'NAME'
+        bpy.context.view_layer.objects.active = body
+        with bpy.context.temp_override(object=body, active_object=body):
+            bpy.ops.object.datalayout_transfer(modifier='DT')
+        body.modifiers.move(len(body.modifiers) - 1, 0)
+        self.apply_mod(body, 'DT')
+        bpy.context.view_layer.objects.active = body
+        with bpy.context.temp_override(object=body, active_object=body):
+            bpy.ops.object.vertex_group_limit_total(group_select_mode='ALL', limit=4)
+            bpy.ops.object.vertex_group_normalize_all(lock_active=False)
+        for o in (qbody, self.eyes, self.brows): bpy.data.objects.remove(o)
+        body.name = 'Body'; self.body = body
+        self.refresh_body()
+        # Augen, Brauen, Wimpern von MakeHuman (folgen dem Kopf)
+        self.eyes, _ = H.proxy('Low-Poly', 'eyes'); self.eyes.name = 'Eyes'
+        self.brows, self._brow_tex = H.proxy('eyebrow001', 'eyebrows'); self.brows.name = 'MASK_Brauen'
+        self.lashes, lash_tex = H.proxy('Eyelashes01', 'eyelashes'); self.lashes.name = 'MASK_Wimpern'
+        for o in (self.eyes, self.brows, self.lashes):
+            self._attach(o); self.rig(o, {'Head': 1.0})
+        sk = MHA + f'skins/young_caucasian_{g}/textures/young_lightskinned_{g}_diffuse.png'
+        png = make_skin(sk, self.out + 'skin_mh.png', skin, keep=1.0, warm=0.25)
+        self.M['skin'] = self._tex_mat('M_skin', self._paint_skin(png), 0.55)
+        self.M['eyes'] = self._tex_mat('M_eyes', MHA + f'proxies/eyes/Low-Poly/textures/{augen}_eye.png', 0.2)
+        self.M['lash'] = self._alpha_mat('MASK_lash', lash_tex, '#3b2a1f')
+
+    def _paint_skin(self, png):
+        """Haut neu abwickeln (Gesicht bekommt viel mehr Platz in der Textur) und wie gemalt einfärben:
+        Grundfarbe aus der MakeHuman-Haut, dazu weiche Schatten in Augenhöhlen, an Nase, Lippen und Ohren
+        (gebackene Umgebungsverdeckung, Schatten leicht rötlich, weil Haut durchscheint) und feine Poren."""
+        import numpy as np
+        from PIL import Image
+        from scipy import ndimage
+        S = 1024
+        out = self.out + 'skin_gemalt.png'
+        o, me = self.body, self.body.data
+        # 1. neue Abwicklung: Kopf 2,6-mal größer, dann alles neu packen
+        src = me.uv_layers['UVMap']
+        neu = me.uv_layers.new(name='Haut')
+        hg = o.vertex_groups['Head'].index
+        head = {v.index for v in me.vertices if any(g.group == hg and g.weight > 0.5 for g in v.groups)}
+        bm = bmesh.new(); bm.from_mesh(me)
+        uvl = bm.loops.layers.uv['Haut']
+        pack_uv(bm, uvl, lambda f: sum(v.index in head for v in f.verts) * 2 >= len(f.verts), 2.6)
+        bm.to_mesh(me); bm.free()
+        me.uv_layers.active = me.uv_layers['Haut']
+        # 2. Farbe aus der alten Abwicklung und Umgebungsverdeckung backen
+        sc = bpy.context.scene
+        sc.render.engine = 'CYCLES'; sc.cycles.device = 'CPU'
+        sc.world = sc.world or bpy.data.worlds.new('W')
+        sc.render.bake.margin = 8
+        bpy.ops.object.select_all(action='DESELECT'); o.select_set(True); bpy.context.view_layer.objects.active = o
+        def bake(kind, setup, samples):
+            img = bpy.data.images.new('b' + kind, S, S, alpha=False)
+            m = bpy.data.materials.new('bake'); m.use_nodes = True; nt = m.node_tree
+            setup(nt)
+            t = nt.nodes.new('ShaderNodeTexImage'); t.image = img
+            uvn = nt.nodes.new('ShaderNodeUVMap'); uvn.uv_map = 'Haut'; nt.links.new(uvn.outputs[0], t.inputs[0])
+            nt.nodes.active = t
+            o.data.materials.clear(); o.data.materials.append(m)
+            sc.cycles.samples = samples
+            bpy.ops.object.bake(type=kind)
+            return np.array(img.pixels[:], np.float32).reshape(S, S, 4)[::-1, :, :3]
+        def emit(nt):
+            e = nt.nodes.new('ShaderNodeEmission'); t = nt.nodes.new('ShaderNodeTexImage'); t.image = bpy.data.images.load(png)
+            u = nt.nodes.new('ShaderNodeUVMap'); u.uv_map = 'UVMap'
+            nt.links.new(u.outputs[0], t.inputs[0]); nt.links.new(t.outputs['Color'], e.inputs['Color'])
+            nt.links.new(e.outputs[0], nt.nodes['Material Output'].inputs['Surface'])
+        for x in (self.eyes, self.brows, self.lashes): x.hide_render = True
+        col = bake('EMIT', emit, 1)
+        sc.world.light_settings.distance = 0.05
+        ao = bake('AO', lambda nt: None, 64)[..., 0]
+        for x in (self.eyes, self.brows, self.lashes): x.hide_render = False
+        o.data.materials.clear()
+        me.uv_layers.remove(me.uv_layers['UVMap']); me.uv_layers.active = me.uv_layers['Haut']
+        self.eyes.data.uv_layers[0].name = 'Haut'   # gleicher Name, sonst gehen die Augen beim Zusammenfügen verloren
+        # 3. zusammensetzen: Schatten warm, feine Poren (die gebackenen Bilder liegen schon in sRGB vor)
+        g = col.mean(-1, keepdims=True); col = np.clip((g + (col - g) * 1.2) * 0.88, 0, 1)   # satter, etwas dunkler
+        a = np.clip(ao, 0, 1)[..., None]
+        shade = 0.35 + 0.65 * a ** 1.3
+        warm = np.array([1.0, 0.86, 0.82], np.float32)
+        res = col * shade * (warm + (1 - warm) * a)
+        rng = np.random.default_rng(5)
+        pores = ndimage.gaussian_filter(rng.standard_normal((S, S)).astype(np.float32), 1.2)
+        res *= (1 + 0.012 * pores / pores.std())[..., None]
+        Image.fromarray((np.clip(res, 0, 1) * 255).astype(np.uint8)).save(out)
+        return out
+
+    def _attach(self, o):
+        o.parent = self.arm; o.matrix_parent_inverse = self.arm.matrix_world.inverted()
+        if not any(m.type == 'ARMATURE' for m in o.modifiers):
+            m = o.modifiers.new('Armature', 'ARMATURE'); m.object = self.arm
+
+    def _alpha_mat(self, name, src, color, rough=0.6):
+        """Material mit Durchsicht (Brauen, Wimpern, Haarsträhnen): Textur auf die Farbe umgefärbt.
+        Der Name beginnt mit MASK_, daran erkennt skelett.mjs die Durchsicht (glTF alphaMode MASK)."""
+        from textures import tint_alpha
+        png = tint_alpha(src, self.out + name + '.png', color)
+        m = bpy.data.materials.new(name); m.use_nodes = True
+        nt = m.node_tree; b = nt.nodes['Principled BSDF']
+        t = nt.nodes.new('ShaderNodeTexImage'); t.image = bpy.data.images.load(png); t.image.name = name
+        nt.links.new(t.outputs['Color'], b.inputs['Base Color']); nt.links.new(t.outputs['Alpha'], b.inputs['Alpha'])
+        b.inputs['Roughness'].default_value = rough
+        return m
+
+    def conform(self, o):
+        """Teil, das für den Quaternius-Körper gebaut ist (z. B. Quaternius-Frisur), auf den MakeHuman-Körper
+        übertragen: gleicher Abstand zur Haut wie vorher."""
+        if not self.mh: return o
+        mw = o.matrix_world; inv = mw.inverted()
+        for v in o.data.vertices:
+            p = mw @ v.co
+            hq, nq, _, _ = self.QBODY.find_nearest(p)
+            if hq is None: continue
+            s = (p - hq).dot(nq); tang = p - hq - nq * s
+            hm, nm, _, _ = self.BODY.find_nearest(hq)
+            if hm is None: continue
+            v.co = inv @ (hm + nm * s + tang)
+        return o
 
     # ------------------------------------------------------------ Maße
     def Z(self, z):
@@ -564,7 +765,21 @@ class Figur:
                 res = o
         for o in objs:
             if o.type == 'ARMATURE' or o.name.startswith('Ico'): bpy.data.objects.remove(o)
-        return res
+        bpy.context.view_layer.update()
+        return self.conform(res)
+
+    def frisur(self, file, color, name='MASK_Haar', rough=0.5):
+        """MakeHuman-Frisur aus vielen dünnen Strähnenflächen mit Durchsicht (long01, ponytail01, bob01, bob02,
+        short01-04, Braid01, afro01), umgefärbt auf color. Folgt Kopf, Hals und Rücken."""
+        o, tex = self.mh.proxy(file, 'hair')
+        o.name = name; self._attach(o)
+        if len(o.data.polygons) > 1200:   # viele kleine Strähnenflächen: fürs Dreiecksbudget etwas vereinfachen
+            self.modify(o, 'DECIMATE', ratio=1200 / len(o.data.polygons))
+        self.set_mat(o, self._alpha_mat('MASK_' + file, tex, color, rough))
+        for b in ('Head', 'neck_01', 'spine_03'): o.vertex_groups.new(name=b)
+        for v in o.data.vertices:
+            for g, w in self.hair_weights(v.co.z).items(): o.vertex_groups[g].add([v.index], w, 'REPLACE')
+        return o
 
     def hair_weights(self, z):
         h = min(1, max(0, (z - self.Z(1.42)) / 0.16))
@@ -634,12 +849,28 @@ class Figur:
                 if inside(v.co, planes, 0.012) and (filt is None or filt(v.co)): return True
             return False
         bmesh.ops.delete(bm, geom=[f for f in bm.faces if all(covered(v) for v in f.verts)], context='FACES')
+        if self.mh:   # Mundinneres, Ohrkanäle usw.: Flächen, die von nirgends zu sehen sind
+            bm.faces.ensure_lookup_table()
+            bv = BVHTree.FromBMesh(bm)
+            dirs = [Vector((math.cos(a) * math.cos(e), math.sin(a) * math.cos(e), math.sin(e)))
+                    for e in (-1.1, -0.5, 0.0, 0.5, 1.1) for a in [k * 0.785 for k in range(8)]]
+            hidden = []
+            for f in bm.faces:
+                c = f.calc_center_median() + f.normal * 0.0015
+                if c.z < self.Z(1.45): continue
+                if all(bv.ray_cast(c, d, 0.25)[0] is not None for d in dirs): hidden.append(f)
+            print('Unsichtbare Flächen entfernt:', len(hidden))
+            bmesh.ops.delete(bm, geom=hidden, context='FACES')
         bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context='VERTS')
         bm.to_mesh(self.body.data); bm.free()
         self.set_mat(self.body, self.M['skin']); self.set_mat(self.eyes, self.M['eyes'])
-        brow = self.mat('brow', 'metal', brow_color, 0.7)
-        brow['kind'] = 'brow'
-        self.set_mat(self.brows, brow)
+        if self.mh:
+            self.set_mat(self.brows, self._alpha_mat('MASK_brow', self._brow_tex, brow_color))
+            self.set_mat(self.lashes, self.M['lash'])
+        else:
+            brow = self.mat('brow', 'metal', brow_color, 0.7)
+            brow['kind'] = 'brow'
+            self.set_mat(self.brows, brow)
         if hide_brows: bpy.data.objects.remove(self.brows)
         fixed = 0
         for o in self.arm.children:

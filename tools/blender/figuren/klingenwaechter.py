@@ -49,7 +49,7 @@ F.leg_band('Greave', 0.14, 0.47, 'steel', lambda p: 0.034, rim=0.01, smooth=4, f
 F.leg_band('Knee', 0.5, 0.6, 'steel2', 0.024, rim=0.008, smooth=4, front=True)
 
 # Haare und Bart
-H = F.hair_mesh('Hair_SimpleParted', 'hair')
+H = F.frisur('short02', '#4e3320')   # Strähnen mit Durchsicht
 B = F.hair_mesh('Hair_Beard', 'hair', name='Beard')
 F.M['hair']['root'] = (Z(1.62), Z(1.78))
 
