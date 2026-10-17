@@ -7,7 +7,7 @@ Schattierung sind eigene Arbeit. Weil das Skelett gleich bleibt, passen alle Ani
 
 | Datei | Inhalt | Dreiecke | Größe |
 | --- | --- | --- | --- |
-| `abenteurerin.glb` | Blonde Abenteurerin nach dem Referenzbild: weißes Oberteil mit Lederkorsett, weiße Hose mit blauer Stoffbahn mit Goldborte, Gürtel mit Schnalle und Taschen, Brustriemen, Schulterstück links, Armschienen, fingerlose Handschuhe, Stiefel mit Stoffstulpen, lange Haare, Stirnband mit Brille | ca. 29.800 | 2,8 MB |
+| `abenteurerin.glb` | Blonde Abenteurerin nach dem Referenzbild: weißes Oberteil mit Lederkorsett, weiße Hose mit türkiser Stoffbahn mit Goldborte, Gürtel mit Schnalle und Taschen, Brustriemen, Schulterstück links, Armschienen, fingerlose Handschuhe, Stiefel mit Stoffstulpen, lange Haare, Stirnband mit Brille | ca. 15.600 | 1,3 MB |
 | `vergleich.jpg` | Referenzbild, Blender-Bilder und Spielansicht nebeneinander | – | – |
 | `vergleich-details.jpg` | Spielansicht vor und nach den gemalten Details | – | – |
 
@@ -30,6 +30,9 @@ Claude-Sitzung in der Cloud (dort als Python-Modul `bpy`, ohne Bildschirm).
    Goldborte, Haarsträhnen. Die Muster entstehen als Shader in Blender und werden pro Teil in ein Farbbild
    und ein Reliefbild gebacken. Im Spiel kostet das nur zwei Bilder statt einfarbiger Flächen.
    Augen sind gegenüber dem Grundkörper etwa 16 % größer (in `build.py` oben, `EYE_SCALE`).
+   Fürs iPhone wird danach vereinfacht (Ziel ca. 15.000 Dreiecke, Texturen höchstens 1024 Pixel, siehe
+   Stil-Anweisung): der Körper vorab, wobei das Gesicht fein bleibt; Kleidung und Haare erst nach dem Backen,
+   damit die Details auf dem feinen Netz entstehen.
 4. `tools/figuren/skelett.mjs` setzt die Figur auf das Original-Skelett, damit die Animationen exakt passen.
 
 Alles auf einmal: `QUATERNIUS=<quellordner> sh tools/blender/bauen.sh` (Voraussetzungen stehen oben im Skript).

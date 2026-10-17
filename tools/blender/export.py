@@ -18,12 +18,24 @@ def group_of(n):
         if f(n): return g
     return 'Outfit'
 
+# Fürs iPhone vereinfachen (Ziel: ca. 15.000 Dreiecke). Der Körper vorab (Gesicht bleibt fein),
+# Kleidung, Haare und Kopfschmuck erst nach dem Backen: die Details entstehen auf dem feinen Netz
+# und bleiben über die Texturkoordinaten erhalten. Kleine Teile und die flache Stoffbahn bleiben ganz.
+REDUCE = {'Outfit': 0.4, 'Hair': 0.36}
+def decimate(o, r, group=None):
+    d = o.modifiers.new('D', 'DECIMATE'); d.ratio = r
+    if group: d.vertex_group = group; d.invert_vertex_group = True
+    o.modifiers.move(len(o.modifiers) - 1, 0)
+    bpy.context.view_layer.objects.active = o
+    with bpy.context.temp_override(object=o): bpy.ops.object.modifier_apply(modifier='D')
+decimate(bpy.data.objects['Body'], 0.5, 'Head')
+for o in arm.children:
+    if o.type == 'MESH' and (o.name == 'Tabard' or len(o.data.polygons) < 150):
+        o.vertex_groups.new(name='Behalten').add(list(range(len(o.data.vertices))), 1.0, 'REPLACE')
+
 parts = {}
 for o in arm.children:
     if o.type == 'MESH': add_edge_attr(o)   # Abstand zum Saum, für Nähte und Kanten
-# flache Teile nicht vereinfachen, sonst verschwimmen Borte und Nähte
-for n in ('Tabard',):
-    o = bpy.data.objects[n]; vg = o.vertex_groups.new(name='Behalten'); vg.add(list(range(len(o.data.vertices))), 1.0, 'REPLACE')
 for o in arm.children:
     if o.type == 'MESH': parts.setdefault(group_of(o.name), []).append(o)
 joined = []
@@ -36,14 +48,17 @@ for g, objs in parts.items():
     o.name = g; o.data.name = g
     joined.append(o)
 
-# Kleidung leicht vereinfachen (Dreiecksbudget ca. 30.000)
+# Gemalte Details (Gewebe, Leder, Nähte, Strähnen) in Texturen backen, in Grundhaltung
+arm.data.pose_position = 'REST'
+SIZES = {'Outfit': (1024, 512), 'Hair': (512, 256), 'Headgear': (256, None)}   # höchstens 1024 Pixel
 for o in joined:
-    if o.name == 'Outfit':
-        d = o.modifiers.new('D', 'DECIMATE'); d.ratio = 0.8
-        d.vertex_group = 'Behalten'; d.invert_vertex_group = True
-        o.modifiers.move(len(o.modifiers) - 1, 0)
-        bpy.context.view_layer.objects.active = o
-        with bpy.context.temp_override(object=o): bpy.ops.object.modifier_apply(modifier='D')
+    if o.name in SIZES:
+        img, nimg = bake_details(o, *SIZES[o.name]); print(o.name, 'gebacken', img.name, nimg.name if nimg else '-')
+arm.data.pose_position = 'POSE'
+for o in joined:
+    if o.name in REDUCE: decimate(o, REDUCE[o.name], 'Behalten' if 'Behalten' in o.vertex_groups else None)
+for o in joined:
+    if 'Behalten' in o.vertex_groups: o.vertex_groups.remove(o.vertex_groups['Behalten'])
 
 # Weiche Schatten (Umgebungsverdeckung) selbst berechnen: Strahlen von jedem Punkt nach außen
 import bmesh, math, random
@@ -80,14 +95,6 @@ for o in joined:
         x = floor + (1 - floor) * min(1, ao * 1.15)
         ca.data[v.index].color = (x, x, x, 1)
     print(o.name, 'AO Mittel', round(tot / len(me.vertices), 2))
-
-# Gemalte Details (Gewebe, Leder, Nähte, Strähnen) in Texturen backen, in Grundhaltung
-arm.data.pose_position = 'REST'
-SIZES = {'Outfit': (2048, 1024), 'Hair': (1024, 512), 'Headgear': (512, None)}
-for o in joined:
-    if o.name in SIZES:
-        img, nimg = bake_details(o, *SIZES[o.name]); print(o.name, 'gebacken', img.name, nimg.name if nimg else '-')
-arm.data.pose_position = 'POSE'
 
 for m in bpy.data.materials: m.use_backface_culling = True
 bpy.ops.object.select_all(action='DESELECT')

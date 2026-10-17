@@ -43,7 +43,7 @@ BODY = BVHTree.FromBMesh(_bm); _bm.free()
 # ---------------------------------------------------------------- Materialien
 C = {   # Farben im Guild-Wars-Stil: warmes Elfenbein, sattes Leder, Gold, ein kräftiger Akzent
     'linen':   (srgb('#f0e6d0'), 0.9, 0.0),
-    'accent':  (srgb('#2d5c8f'), 0.85, 0.0),
+    'accent':  (srgb('#2f837f'), 0.85, 0.0),   # Türkis: Schmuckfarbe der Magierin
     'leather': (srgb('#8e5230'), 0.6, 0.0),
     'leather2':(srgb('#4f2f1e'), 0.58, 0.0),
     'boot':    (srgb('#64391f'), 0.55, 0.0),

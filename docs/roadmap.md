@@ -15,7 +15,7 @@ Stand: 16.10.2026
 
 ## Erledigt: Details der Abenteurerin
 
-Gemalte Stoff- und Ledertextur mit Nähten, abgenutzte Lederkanten, Haarsträhnen, größere Augen, Farben im Guild-Wars-Stil (Elfenbein, Rotbraun, Gold, saphirblaue Stoffbahn). Siehe `assets/characters/eigene/vergleich-details.jpg`.
+Gemalte Stoff- und Ledertextur mit Nähten, abgenutzte Lederkanten, Haarsträhnen, größere Augen, Farben nach der GW3-Stil-Anweisung (Creme, Rotbraun, Gold, türkise Stoffbahn). Vereinfacht auf ca. 15.600 Dreiecke und 1024er Texturen fürs iPhone. Siehe `assets/characters/eigene/vergleich-details.jpg`.
 
 ## Als Nächstes
 

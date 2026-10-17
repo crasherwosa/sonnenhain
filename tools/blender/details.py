@@ -114,7 +114,7 @@ def detail_shader(mat, kind):
         # Saum: Kante etwas dunkler, Steppnaht 6–8 mm vom Rand
         hem = g.band(edge, -1.0, 0.004, 0.002)
         col = g.mix(g.math('MULTIPLY', hem, 0.35), col, dark)
-        stitch_band = g.band(edge, 0.0065, 0.0085, 0.0008)
+        stitch_band = g.band(edge, 0.006, 0.009, 0.0008)
         thread = tuple(c * 0.62 for c in base[:3]) + (1,)
         if kind == 'trim':
             # goldene Borte am Rand, Naht innen daneben
@@ -122,7 +122,7 @@ def detail_shader(mat, kind):
             tr = g.band(edge, -1.0, 0.0045, 0.001)
             col = g.mix(tr, col, g.mix(g.math('MULTIPLY', weave, 0.3), gold, (0.55, 0.34, 0.1, 1)))
             height = g.math('ADD', height, g.math('MULTIPLY', tr, 0.8))
-            stitch_band = g.band(edge, 0.0065, 0.0082, 0.0006)
+            stitch_band = g.band(edge, 0.006, 0.009, 0.0006)
             thread = gold
     elif kind == 'leather':
         vor = g.n('ShaderNodeTexVoronoi', Scale=160.0, _feature='DISTANCE_TO_EDGE'); g.link(tc, vor.inputs['Vector'])
@@ -135,7 +135,7 @@ def detail_shader(mat, kind):
         worn = g.band(edge, -1.0, 0.003, 0.002)
         col = g.mix(g.math('MULTIPLY', worn, 0.5), col, light)
         height = grain.outputs[0]
-        stitch_band = g.band(edge, 0.005, 0.0068, 0.0006)
+        stitch_band = g.band(edge, 0.0045, 0.0075, 0.0006)
         thread = (0.78, 0.66, 0.46, 1)   # helles Garn
     elif kind == 'hair':
         # Strähnen: Rauschen stark in die Länge gezogen, dunklere Ansätze
@@ -155,7 +155,7 @@ def detail_shader(mat, kind):
         stitch_band = None
     if stitch_band is not None:
         # Stiche: kurze Striche entlang der Naht
-        ck = g.n('ShaderNodeTexChecker', Scale=1.0); g.link(scaled((260, 260, 260)), ck.inputs['Vector'])
+        ck = g.n('ShaderNodeTexChecker', Scale=1.0); g.link(scaled((150, 150, 150)), ck.inputs['Vector'])
         dash = ck.outputs['Fac']
         wide = g.n('ShaderNodeAttribute', _attribute_name='wide').outputs['Fac']
         st = g.math('MULTIPLY', g.math('MULTIPLY', stitch_band, dash), wide)
