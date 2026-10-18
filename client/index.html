@@ -293,6 +293,7 @@ import { mergeVertices, mergeGeometries } from 'three/addons/utils/BufferGeometr
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { loadFigures, createFigure, locomotion } from './figuren.js';
 import { buildUndergrowth, buildCloudCards, blossomGeo } from './umgebung.js';
+import { loadEnvModels } from './modelle.js';
 
 /* =========================================================
    Helpers
@@ -1345,24 +1346,90 @@ function genBush(seed){
   return { bark: mergeGeometries(bark), leaves };
 }
 
-function buildTrees(){
-  const rnd = mulberry32(42), trees = [];
+/* ---------- Umgebungsmodelle aus Blender (client/modelle.js, assets/environment/) ----------
+   Fehlen die Dateien, baut das Spiel die einfachen Formen aus dem Code wie bisher. */
+let envLoading = Promise.resolve(null), ENV = null;
+const _envPatched = new WeakSet(), _envDepth = new Map();
+const _em = new THREE.Matrix4(), _eq = new THREE.Quaternion(), _ep = new V3(), _es = new V3();
+function envMat(mat, foliage){
+  if (_envPatched.has(mat)) return mat;
+  _envPatched.add(mat);
+  if (foliage) mat.alphaToCoverage = true;
+  mat.onBeforeCompile = sh => {
+    sh.uniforms.tCloud = { value: TEX.cloud }; sh.uniforms.uTime = shared.uTime; sh.uniforms.uWind = shared.uWind;
+    sh.vertexShader = 'uniform float uTime, uWind; varying vec3 vEW;\n' + sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
+      #ifdef USE_INSTANCING
+        ${foliage ? `vec3 tip = vec3(instanceMatrix[3][0], instanceMatrix[3][1], instanceMatrix[3][2]);
+        float tph = uTime * 0.9 + tip.x * 0.07 + tip.z * 0.05, tH = max(position.y, 0.0);
+        transformed.x += (sin(tph) * 0.6 + sin(tph * 2.7) * 0.2) * tH * 0.01 * uWind;
+        transformed.z += sin(tph * 0.8 + 1.3) * tH * 0.008 * uWind;
+        transformed += objectNormal * sin(uTime * 3.2 + dot(position, vec3(2.3, 1.7, 2.9))) * 0.03 * uWind;` : ''}
+        vEW = (modelMatrix * instanceMatrix * vec4(transformed, 1.0)).xyz;
+      #else
+        vEW = (modelMatrix * vec4(transformed, 1.0)).xyz;
+      #endif`);
+    let fs = 'uniform sampler2D tCloud; uniform float uTime; varying vec3 vEW;\n' + CLOUD_GLSL + sh.fragmentShader.replace('#include <color_fragment>', `#include <color_fragment>
+      diffuseColor.rgb *= cloudSh(vEW.xz);`);
+    // Blätter: bleiben in der Ferne dicht und leuchten im Gegenlicht
+    if (foliage) fs = fs.replace('#include <map_fragment>', MIP_ALPHA_GLSL).replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
+      totalEmissiveRadiance += diffuseColor.rgb * vec3(1.1, 1.05, 0.7) * pow(max(dot(normalize(vEW - cameraPosition), ${SUNV}), 0.0), 4.0) * 0.55;`);
+    sh.fragmentShader = fs;
+  };
+  mat.customProgramCacheKey = () => foliage ? 'envFoliage' : 'envSolid';
+  return mat;
+}
+function envDepth(mat){
+  if (!_envDepth.has(mat)) _envDepth.set(mat, new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: mat.map, alphaTest: mat.alphaTest, side: THREE.DoubleSide }));
+  return _envDepth.get(mat);
+}
+// Viele gleiche Modelle als InstancedMesh, aufgeteilt in große Felder, damit Kamera und Schatten weit Entferntes auslassen
+function placeEnv(model, list, tint){
+  const CELL = 95, cells = new Map();
+  for (const t of list) { const k = Math.floor((t.x + HALF) / CELL) + ',' + Math.floor((t.z + HALF) / CELL); if (!cells.has(k)) cells.set(k, []); cells.get(k).push(t); }
+  for (const items of cells.values()) for (const part of model.parts) {
+    const mesh = new THREE.InstancedMesh(part.geometry, envMat(part.material, part.foliage), items.length);
+    items.forEach((t, i) => {
+      _eq.setFromAxisAngle(_up, t.rot); _em.compose(_ep.set(t.x, t.y, t.z), _eq, _es.setScalar(t.s)); mesh.setMatrixAt(i, _em);
+      if (tint) mesh.setColorAt(i, tint(t, part));
+    });
+    mesh.castShadow = mesh.receiveShadow = true;
+    if (part.foliage) { mesh.customDepthMaterial = envDepth(part.material); foliageMeshes.push(mesh); }
+    mesh.computeBoundingSphere(); scene.add(mesh);
+  }
+}
+// Einzelnes Modell (Ruinen): die Vorderseite mit dem Efeu zeigt nach face (Winkel um die Hochachse)
+function addEnv(model, x, z, face, s, sink = 0.1){
+  const g = new THREE.Group(); g.position.set(x, getH(x, z) - sink, z); g.rotation.y = face; g.scale.setScalar(s);
+  for (const part of model.parts) {
+    const m = new THREE.Mesh(part.geometry, envMat(part.material, part.foliage));
+    m.castShadow = m.receiveShadow = true;
+    if (part.foliage) m.customDepthMaterial = envDepth(part.material);
+    g.add(m);
+  }
+  scene.add(g);
+  return g;
+}
+const faceTo = (x, z, tx, tz) => Math.atan2(tx - x, tz - z);
+
+async function buildTrees(){
+  ENV = await envLoading;
+  const rnd = mulberry32(42), trees = [], minD2 = ENV ? 20 : 10, maxTrees = ENV ? (isTouch ? 280 : 380) : 440;
   let tries = 0;
-  while (trees.length < 440 && tries < 26000) {
+  while (trees.length < maxTrees && tries < 26000) {
     tries++;
     const x = (rnd() * 2 - 1) * 178, z = (rnd() * 2 - 1) * 178, r = Math.hypot(x, z);
     if (r < 27 || r > 185) continue;
     const h = getH(x, z);
     if (h < 1.2 || h > 33 || pathAt(x, z) < 4 || slopeAt(x, z) > 0.4) continue;
     if (fbm(x * 0.018 + 90, z * 0.018, 3) < -0.05 && rnd() > 0.15) continue;
-    let near = false; for (const t of trees) if ((t.x - x) ** 2 + (t.z - z) ** 2 < 10) { near = true; break; }
+    let near = false; for (const t of trees) if ((t.x - x) ** 2 + (t.z - z) ** 2 < minD2) { near = true; break; }
     if (near) continue;
     trees.push({ x, z, h, s: 0.8 + rnd() * 0.75, rot: rnd() * 6.28, type: h > 13 || r > 125 ? 'pine' : (rnd() < 0.24 ? 'birch' : 'oak') });
   }
   const leafy = trees.filter(t => t.type !== 'pine'), pines = trees.filter(t => t.type === 'pine');
   const bushes = [];
   { const rb = mulberry32(313); let tr = 0;
-    while (bushes.length < 520 && tr < 9000) { tr++;
+    while (bushes.length < (ENV && isTouch ? 320 : 520) && tr < 9000) { tr++;
       let x, z;
       if (rb() < 0.65 && leafy.length) { const t = leafy[Math.floor(rb() * leafy.length)]; const a = rb() * 6.28, r = 2 + rb() * 3.5; x = t.x + Math.cos(a) * r; z = t.z + Math.sin(a) * r; }
       else { x = (rb() * 2 - 1) * 150; z = (rb() * 2 - 1) * 150; }
@@ -1380,6 +1447,19 @@ function buildTrees(){
     }
   }
   FOREST_TEX.needsUpdate = true;
+  if (ENV) {
+    const rc = mulberry32(7), c = new THREE.Color();
+    const spread = (models, list, sc, sink, tint) => models.forEach((md, k) => placeEnv(md, list.filter((t, i) => i % models.length === k)
+      .map(t => ({ x: t.x, y: t.h - sink * t.s, z: t.z, rot: t.rot, s: t.s * sc, type: t.type })), tint));
+    // Laubbäume ca. 4–9 m, Kiefern ca. 9–18 m, Büsche ca. 1–2,5 m; Birken mit gelblicherem Laub
+    spread(ENV.laubbaum, leafy, 0.55, 0.12, (t, part) => part.foliage ? (t.type === 'birch' ? c.setRGB(0.86 + rc() * 0.08, 0.84 + rc() * 0.06, 0.7) : c.setRGB(0.5 + rc() * 0.12, 0.66 + rc() * 0.1, 0.85 + rc() * 0.15)) : c.setRGB(1, 1, 1));
+    spread(ENV.kiefer, pines, 0.8, 0.12, (t, part) => part.foliage ? c.setRGB(0.9 + rc() * 0.14, 0.93 + rc() * 0.12, 0.9 + rc() * 0.1) : c.setRGB(1, 1, 1));
+    spread(ENV.busch, bushes, 0.62, 0.05, (t, part) => part.foliage ? c.setRGB(0.52 + rc() * 0.14, 0.66 + rc() * 0.12, 0.85 + rc() * 0.15) : c.setRGB(1, 1, 1));
+    // Kiefern wirken mit einer zweiten, gedrehten Nadelschicht dichter
+    ENV.kiefer.forEach((md, k) => placeEnv({ parts: md.parts.filter(pt => pt.foliage) }, pines.filter((t, i) => i % ENV.kiefer.length === k)
+      .map(t => ({ x: t.x, y: t.h + 0.3 * t.s, z: t.z, rot: t.rot + 1.9, s: t.s * 0.8 * 0.94 })), () => c.setRGB(0.82 + rc() * 0.12, 0.86 + rc() * 0.1, 0.84 + rc() * 0.1)));
+    return;
+  }
   const leafTex = makeLeafAtlas(), frondTex = makeFrondTex();
   const bMat = barkMat(), lMat = foliageMat(leafTex), fMat = foliageMat(frondTex), lDep = foliageDepth(leafTex), fDep = foliageDepth(frondTex);
   const OAK = [11, 23, 37, 51].map(genOak), PINE = [5, 17, 29, 43].map(genPine), BUSH = [3, 9, 15].map(genBush);
@@ -1399,6 +1479,7 @@ function buildTrees(){
 }
 
 function buildRocks(){
+  if (ENV) return buildRockModels();
   const rnd = mulberry32(99), geo = softGeo(new THREE.DodecahedronGeometry(1, 3), 0.2, 1.3);
   const N = 190, mesh = new THREE.InstancedMesh(geo, triMat(TEX.rock, { scale: 0.32, moss: 0.7, nstr: 1.3 }), N);
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), c = new THREE.Color();
@@ -1417,6 +1498,38 @@ function buildRocks(){
     n++;
   }
   mesh.count = n; mesh.castShadow = mesh.receiveShadow = true; mesh.computeBoundingSphere(); scene.add(mesh);
+}
+
+// Felsbrocken und Klippen aus Blender
+function buildRockModels(){
+  const rnd = mulberry32(99), c = new THREE.Color(), rocks = ENV.fels.map(() => []), cliffs = ENV.klippe.map(() => []);
+  let n = 0, tries = 0;
+  while (n < 190 && tries < 6000) {
+    tries++;
+    const x = (rnd() * 2 - 1) * 175, z = (rnd() * 2 - 1) * 175, r = Math.hypot(x, z);
+    if (r < 20) continue;
+    const h = getH(x, z); if (h < -0.5 || pathAt(x, z) < 3) continue;
+    const k = n % rocks.length, md = ENV.fels[k], s = (0.55 + rnd() * 0.75) * (r > 120 ? 1.6 : 1);
+    rocks[k].push({ x, y: h - md.size.y * s * 0.08, z, rot: rnd() * 6.283, s, v: 0.88 + rnd() * 0.22 });
+    if (md.radius * s > 0.8) colliders.push({ x, z, r: md.radius * s * 0.8 });
+    n++;
+  }
+  // Klippen an steilen Hängen weiter draußen
+  const placed = []; tries = 0;
+  while (placed.length < (isTouch ? 16 : 26) && tries < 20000) {
+    tries++;
+    const x = (rnd() * 2 - 1) * 178, z = (rnd() * 2 - 1) * 178, r = Math.hypot(x, z);
+    if (r < 55 || r > 140) continue;
+    const h = getH(x, z); if (h < 3 || h > 24 || slopeAt(x, z) < 0.36 || pathAt(x, z) < 8) continue;
+    if (placed.some(p => (p.x - x) ** 2 + (p.z - z) ** 2 < 260)) continue;
+    const k = placed.length % cliffs.length, md = ENV.klippe[k], s = 0.75 + rnd() * 0.6;
+    const p = { x, y: h - 1.2 * s, z, rot: rnd() * 6.283, s, v: 0.92 + rnd() * 0.16 };
+    cliffs[k].push(p); placed.push(p);
+    colliders.push({ x, z, r: md.radius * s * 0.7 });
+  }
+  const tint = t => c.setRGB(t.v * 1.02, t.v, t.v * 0.97);
+  ENV.fels.forEach((md, k) => placeEnv(md, rocks[k], tint));
+  ENV.klippe.forEach((md, k) => placeEnv(md, cliffs[k], tint));
 }
 
 function buildPebbles(){
@@ -1586,7 +1699,19 @@ function buildRuins(){
   let [cx, cz] = findLand(-60, 36); const h0 = getH(cx, cz);
   addMesh(new THREE.CylinderGeometry(8.6, 9.2, 3.2, 8), stDark, cx, h0 - 1.3, cz).rotation.y = 0.2;
   addMesh(new THREE.CylinderGeometry(6.2, 6.4, 0.25, 8), st, cx, h0 + 0.38, cz).rotation.y = 0.2;
-  for (let k = 0; k < 8; k++) {
+  if (ENV) {
+    // Ruinenstein etwas dunkler und wärmer, damit er nicht weiß leuchtet
+    for (const k of ['saeule', 'schrein', 'bogen', 'turm']) for (const pt of ENV[k][0].parts) if (!pt.foliage) pt.material.color.setRGB(0.6, 0.57, 0.52);
+    // Säulen aus Blender im Kreis, Efeu nach innen; der Schrein steht etwas abseits und blickt zur Mitte
+    for (let k = 0; k < 5; k++) {
+      const a = k / 5 * Math.PI * 2 + 0.5, px = cx + Math.cos(a) * 7.4, pz = cz + Math.sin(a) * 7.4;
+      addEnv(ENV.saeule[0], px, pz, faceTo(px, pz, cx, cz), 0.95, 0.05).position.y = h0 + 0.45;
+      colliders.push({ x: px, z: pz, r: 1.1 });
+    }
+    const sa = Math.atan2(-cz, -cx), sx = cx + Math.cos(sa) * 17, sz = cz + Math.sin(sa) * 17;
+    addEnv(ENV.schrein[0], sx, sz, faceTo(sx, sz, cx, cz), 1, 0.15);
+    colliders.push({ x: sx, z: sz, r: 2.4 });
+  } else for (let k = 0; k < 8; k++) {
     const a = k / 8 * Math.PI * 2 + 0.2, px = cx + Math.cos(a) * 7.2, pz = cz + Math.sin(a) * 7.2;
     const broken = rnd() < 0.45, hgt = broken ? 1.2 + rnd() * 2.2 : 5.2;
     addMesh(new THREE.BoxGeometry(1.25, 0.5, 1.25), st, px, h0 + 0.5, pz);
@@ -1604,7 +1729,10 @@ function buildRuins(){
   runeRings.push(ring);
   colliders.push({ x: cx, z: cz, r: 1.2 });
   // arch across the north-east road
-  { const ax = 84, az = 66, dirx = 0.69, dirz = 0.72, nx = -dirz, nz = dirx, ah = getH(ax, az);
+  if (ENV) { const ax = 84, az = 66, nx = -0.72, nz = 0.69;
+    addEnv(ENV.bogen[0], ax, az, Math.atan2(-nz, nx), 1.25, 0.15);
+    for (const sd of [-1, 1]) colliders.push({ x: ax + nx * 3.3 * sd, z: az + nz * 3.3 * sd, r: 0.9 });
+  } else { const ax = 84, az = 66, dirx = 0.69, dirz = 0.72, nx = -dirz, nz = dirx, ah = getH(ax, az);
     for (const sd of [-1, 1]) {
       const px = ax + nx * 3.4 * sd, pz = az + nz * 3.4 * sd, ph = getH(px, pz);
       addMesh(new THREE.BoxGeometry(1.3, 0.6, 1.3), stDark, px, ph + 0.1, pz).rotation.y = Math.atan2(nx, nz);
@@ -1617,7 +1745,10 @@ function buildRuins(){
     addMesh(new THREE.OctahedronGeometry(0.16, 0), rune, ax, ah + 9.1, az);
   }
   // broken watchtower
-  { let [tx, tz] = findLand(-102, -50); const th = getH(tx, tz);
+  if (ENV) { const [tx, tz] = findLand(-102, -50);
+    addEnv(ENV.turm[0], tx, tz, faceTo(tx, tz, 0, 0), 1.15, 0.15);
+    colliders.push({ x: tx, z: tz, r: 2.6 });
+  } else { let [tx, tz] = findLand(-102, -50); const th = getH(tx, tz);
     for (let k = 0; k < 14; k++) {
       if (k === 3) continue;
       const a = k / 14 * Math.PI * 2, hgt = 3 + rnd() * 7 + (k % 5 === 0 ? 4 : 0);
@@ -2759,6 +2890,7 @@ async function bootWorld(){
   // Figuren laden parallel zum Erzeugen der Texturen
   const figuresLoading = loadFigures([heroClass, 'mira']);
   figuresLoading.catch(() => {});
+  envLoading = loadEnvModels().catch(e => { console.warn('Umgebungsmodelle nicht geladen, nutze einfache Formen:', e); return null; });
   setLoad('Texturen werden erzeugt … 0 %');
   bakeProg.onStep = () => setLoad(`Texturen werden erzeugt … ${Math.min(99, Math.round(bakeProg.done / bakeProg.total * 100))} %`);
   await bakeTextures();

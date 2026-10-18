@@ -14,6 +14,8 @@ Stand: 16.10.2026
 - Umgebung im Stil von Guild Wars 2: gemalte Haufenwolken, bläulicher Dunst in der Ferne, wärmeres Licht mit bläulichen Schatten, hellere Wiesen mit goldenen Flecken. Neues Unterholz (Farne, hohe Grasbüschel, Baumstümpfe, liegende Stämme), Schilf und Seerosen an den Seen, türkisfarbenes Wasser mit Schaumrand. Sanfter Wind in Gras und Bäumen, Baumkronen bleiben auch in der Ferne dicht. Dichte, Sichtweite und Wind folgen den Grafikstufen. Code in `client/umgebung.js`, Vorher/Nachher-Bilder mit `tools/ansichten.mjs`.
 - Umgebung nach der Stil-Anweisung (Vorbild Guild Wars 3): Tageszeit „Goldene Stunde“ (tiefe Sonne, rosa-fliederfarbener Himmel, lange Schatten) als neue Grundeinstellung, „Mittag“ wählbar auf dem Startbildschirm. Flache Nebelbänder über Wiesen und See, fliederfarbener Dunst, höheres Gras mit leuchtenden Spitzen im Gegenlicht, Blumen in blau-lila Gruppen mit roten und orangen Tupfern, Pollen, die im Gegenlicht aufleuchten, feines Filmkorn.
 
+- Umgebungsmodelle aus Blender im Spiel: drei Laubbäume, zwei Kiefern, zwei Büsche, vier Felsbrocken, zwei Klippen sowie Bogen, Säulen, Schrein und Turmruine (Poly-Haven-Texturen, CC0). Sie ersetzen die einfachen Formen aus dem Code; Blätter wehen im Wind und leuchten im Gegenlicht. Code in `client/modelle.js`.
+
 ## Als Nächstes
 
 1. **Aufräumen und Leistung:** `client/index.html` in Module aufteilen (Welt, Spieler, Kampf, Gegner, Quests, Oberfläche). Grafikstufen neu abstimmen, damit es am Mac und iPhone flüssig läuft.
