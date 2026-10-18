@@ -13,12 +13,18 @@ Sonnenhain ist ein stilisiertes Fantasy-Rollenspiel im Browser, inspiriert von G
 - Größere Änderungen vor dem Umsetzen kurz ankündigen. Nach dem Umsetzen: testen, Vorschau geben, erst dann ins Repository.
 - Modelle entstehen in Blender und kommen als `.glb` nach `assets/`. Zwei Wege: Claude Desktop + BlenderMCP auf dem Mac des Inhabers, oder per Python-Skript in jeder Cloud-Sitzung (`pip install bpy`, ohne Bildschirm). Skripte für eigene Figuren liegen in `tools/blender/`, Anleitung in `assets/characters/eigene/README.md`.
 
+## Aussehen
+
+Wie Welt und Figuren aussehen sollen (Vorbild Guild Wars 3, „stilisierter Realismus“), steht in `docs/style.md`. Jede Arbeit an Grafik, Umgebung oder Figuren richtet sich danach. Welche Umgebungsmodelle aus Blender kommen sollen und mit welchen Regeln, steht in `docs/blender-umgebung.md`.
+
 ## Aufbau
 
 | Ordner | Inhalt |
 | --- | --- |
 | `client/` | Das Spiel. Statische Dateien, kein Build-Schritt. `client/index.html` ist der Einstieg. |
 | `client/figuren.js` | Lädt die Figuren (eigene Blender-Figuren auf dem Quaternius-Skelett, KayKit für später), hängt Waffen an und steuert die Animationen. Welche Klasse welche Figur, Waffe und Angriffe hat, steht oben in der Datei. |
+| `client/umgebung.js` | Wolken, Unterholz (Farne, Grasbüschel, Schilf, Seerosen, Stümpfe) und Wind. Gelände, Licht, Himmel und Wasser stehen noch in `client/index.html`. |
+| `client/modelle.js` | Lädt die Umgebungsmodelle aus Blender (`assets/environment/`: Bäume, Büsche, Felsen, Klippen, Ruinen). Fehlen sie, baut das Spiel einfache Formen aus dem Code. |
 | `client/figuren.html` | Figurenschau: alle Klassen nebeneinander, Bewegungen per Knopf. Zum Prüfen neuer Figuren und Waffen. |
 | `client/vendor/three/` | three.js r160, lokal mitgeliefert (nur die benötigten Dateien). Nicht verändern. |
 | `assets/` | Modelle (`.glb`), später Sounds und Bilder. Regeln in `assets/README.md`. |
@@ -41,6 +47,7 @@ Sonnenhain ist ein stilisiertes Fantasy-Rollenspiel im Browser, inspiriert von G
 
 - Lokal starten: `tools/serve.sh` und dann `http://localhost:8765/client/` öffnen.
 - Rauchtest ohne Grafikkarte: `node tools/smoketest.mjs` (benötigt Playwright mit Chromium). Startet das Spiel, wartet auf den Weltaufbau, meldet Konsolenfehler und legt Screenshots in `tools/out/` ab.
+- Vorher/Nachher-Bilder der Welt aus festen Blickwinkeln: `node tools/ansichten.mjs [mittel|hoch|ultra]`, Bilder in `tools/out/ansichten/`.
 - Vor jedem Hochladen: Rauchtest muss ohne Fehler durchlaufen.
 
 ## Commits
