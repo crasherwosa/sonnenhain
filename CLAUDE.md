@@ -15,7 +15,7 @@ Sonnenhain ist ein stilisiertes Fantasy-Rollenspiel im Browser, inspiriert von G
 
 ## Aussehen
 
-Wie Welt und Figuren aussehen sollen (Vorbild Guild Wars 3, „stilisierter Realismus“), steht in `docs/style.md`. Jede Arbeit an Grafik, Umgebung oder Figuren richtet sich danach.
+Wie Welt und Figuren aussehen sollen (Vorbild Guild Wars 3, „stilisierter Realismus“), steht in `docs/style.md`. Jede Arbeit an Grafik, Umgebung oder Figuren richtet sich danach. Welche Umgebungsmodelle aus Blender kommen sollen und mit welchen Regeln, steht in `docs/blender-umgebung.md`.
 
 ## Aufbau
 
