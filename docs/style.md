@@ -39,13 +39,16 @@ Erkenntnisse aus den Guild-Wars-3-Bildern:
 - **Haare:** kräftige, natürliche Farben (Blond, Braun, Rot, Dunkelbraun) mit erkennbaren Strähnen statt einem einzigen Block.
 - **Waffen:** schlank und verziert, im gleichen Stil wie die Rüstung. Die klobigen KayKit-Waffen werden ersetzt.
 - **Kreaturen und Reittiere:** fantastisch, mit leuchtenden türkisen Mustern (Magie). Kleine Gegner dürfen verspielter sein (Glibber, Pilzlinge), bleiben aber im gleichen Licht- und Materialstil.
-- **Weg dorthin:** Die Quaternius-Figuren bleiben die Grundlage (Körper und Animationen). In Blender bekommen sie mehr Rüstungsteile, gemalte Texturen mit Gravuren und Mustern und bessere Haare. Das macht der Chat „Eigene Figur in Blender“.
+- **Spielfiguren und Menschen:** eigene Figuren aus Blender: realistischer Körper aus MakeHuman (CC0) auf dem Quaternius-Skelett, damit alle Animationen passen. Kleidung, Rüstung, Waffen und Texturen sind eigene Arbeit, per Skript (`tools/blender/`) oder von Hand in Blender am Mac (Anleitung „Figuren aus Blender“). Vorbild für Rüstung: dicke, geschichtete Platten mit goldenen Kanten und Ranken, wie beim Klingenwächter. Fertige Modelle in `assets/characters/eigene/`.
+- **Gemalte Details:** Stoff zeigt feines Gewebe, Leder eine Maserung und hellere, abgenutzte Kanten, Ränder haben sichtbare Steppnähte. Die Details werden in Blender in Texturen gebacken (`tools/blender/details.py`), nicht als zusätzliche Dreiecke. Augen etwas größer als realistisch, damit Gesichter freundlich und aus der Ferne lesbar sind.
+- **Erkennungszeichen:** jede Spielfigur bekommt ein markantes Teil für die Silhouette (bei der Abenteurerin: Schulterstück links, Stirnband mit Brille, Stiefelstulpen).
 
 ## Modelle
 
 - Gemalte Texturen mit echtem Materialgefühl (Metall glänzt, Leder matt) statt Fotos. Höchstens 1024 × 1024 Pixel pro Figurentextur.
 - Figuren höchstens ca. 15 000 Dreiecke, damit das iPhone flüssig bleibt.
 - Animationen kommen aus der Universal Animation Library (gleiches Skelett für alle Figuren).
+- Eigene Figuren werden per Skript in Blender gebaut (`tools/blender/`), damit jede Änderung nachvollziehbar und wiederholbar ist. Budget: höchstens ca. 30.000 Dreiecke und 2 MB pro Spielfigur, höchstens vier Teile (Haut, Kleidung, Haare, Kopfschmuck).
 - Technische Regeln in `assets/README.md`.
 
 ## Leistung

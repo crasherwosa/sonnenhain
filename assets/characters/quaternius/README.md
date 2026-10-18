@@ -29,7 +29,7 @@ Gebaut mit `tools/figuren/bauen.mjs`: Kleidung, Kopf und Haare liegen auf einem 
 
 | Klasse im Spiel | Figur | Ausgeblendet | Waffen (KayKit) |
 | --- | --- | --- | --- |
-| Sternenweberin | `abenteurerin` (blond) | Kapuze | `staff` |
+| Sternenweberin | jetzt eigene Figur, siehe `../eigene/README.md` | – | `staff` |
 | Klingenwächter | `abenteurer` | Kapuze, Bart | `sword_1handed`, `shield_badge_color` |
 | Waldläufer | `abenteurer` mit Kapuze | Haare | `bow_withString` |
 | Schattenklinge | `abenteurerin` mit Kapuze (dunkle Haare) | – | zwei `dagger` |

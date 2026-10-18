@@ -13,6 +13,8 @@ import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
 
 const ASSETS = new URL('../assets/characters/', import.meta.url).href;
 const ITEMS = ASSETS + 'kaykit/zubehoer/';
+// Eigene Waffen (tools/blender/waffen.py) liegen in eigene/waffen/, KayKit-Zubehör in kaykit/zubehoer/
+const itemUrl = n => n.startsWith('eigene/') ? ASSETS + n + '.glb' : ITEMS + n + '.gltf';
 
 /* Pro Figurenart: Ordner, Animationspakete, Handknochen, Knochen von Hüfte und Beinen
    (für Angriffe im Laufen) und Übersetzung der allgemeinen Bewegungsnamen. */
@@ -27,6 +29,10 @@ const RIGS = {
     itemGrip: {
       shield_badge_color: { pos: [-0.07, 0.06, 0], rot: [90, -90, 0] },
       staff: { rot: [135, 0, 0], shift: 0.42 },
+      // eigene Waffen sind in echter Größe gebaut (Meter), Griff im Ursprung
+      'eigene/waffen/schwert': { scale: 1 }, 'eigene/waffen/dolch': { scale: 1 }, 'eigene/waffen/axt': { scale: 1 },
+      'eigene/waffen/bogen': { scale: 1 }, 'eigene/waffen/stab': { rot: [135, 0, 0], scale: 1 },
+      'eigene/waffen/schild': { pos: [-0.07, 0.06, 0], rot: [90, -90, 0], scale: 1 },
     },
     lower: ['root', 'pelvis', 'thigh_l', 'calf_l', 'foot_l', 'ball_l', 'thigh_r', 'calf_r', 'foot_r', 'ball_r'],
     // speed: Tempo in m/s, bei dem die Animation mit normaler Geschwindigkeit läuft
@@ -54,18 +60,19 @@ for (const r of Object.values(RIGS)) r.lower = new Set(r.lower);
    hide: Teile der Figur, die ausgeblendet werden (Kapuze, Bart, Haare).
    hand: 'r' = rechte Hand, 'l' = linke Hand. tip: wo Zauber und Geschosse starten. */
 export const FIGURES = {
-  // Sternenweberin: Abenteurerin mit langen Haaren und Stab (wie das Referenzbild)
-  mage:      { rig: 'ual', model: 'abenteurerin', hide: ['Female_Ranger_Head_Hood'], colors: { MI_Hair_2: 0xfff1d0 }, items: [['staff', 'r']], tip: 'r', idle: 'Idle_Loop', attack: ['Spell_Simple_Shoot', 'Spell_Simple_Shoot'] },
-  // Klingenwächter: Abenteurer mit Schwert und Schild
-  warrior:   { rig: 'ual', model: 'abenteurer', hide: ['Male_Ranger_Head_Hood', 'Hair_Beard'], colors: { MI_Hair_1: 0x6b4a32 }, items: [['sword_1handed', 'r'], ['shield_badge_color', 'l']], tip: 'r', idle: 'Sword_Idle', attack: ['Sword_Regular_A', 'Sword_Regular_B'] },
-  // Waldläufer: Abenteurer mit Kapuze und Bogen
-  ranger:    { rig: 'ual', model: 'abenteurer', hide: ['Hair_SimpleParted'], colors: { MI_Hair_1: 0x9a7650 }, items: [['bow_withString', 'l']], tip: 'l', idle: 'Idle_Loop', attack: ['Spell_Simple_Shoot', 'OverhandThrow'] },
-  // Schattenklinge: Abenteurerin mit Kapuze und zwei Dolchen
-  rogue:     { rig: 'ual', model: 'abenteurerin', hide: [], colors: { MI_Hair_2: 0x4a3326 }, items: [['dagger', 'r'], ['dagger', 'l']], tip: 'r', idle: 'Sword_Idle', attack: ['Sword_Regular_C', 'Sword_Regular_B'] },
-  // Bärenherz: bärtiger Abenteurer mit großer Axt
-  barbarian: { rig: 'ual', model: 'abenteurer', hide: ['Male_Ranger_Head_Hood', 'Hair_SimpleParted'], colors: { MI_Hair_1: 0xa0522d }, items: [['axe_2handed', 'r']], tip: 'r', idle: 'Sword_Idle', attack: ['Sword_Heavy_Combo', 'Sword_Attack'] },
-  // Mira, die Bäuerin
-  mira:      { rig: 'ual', model: 'baeuerin', hide: [], colors: { MI_Hair_2: 0x8a5634 }, items: [], tip: 'r', idle: 'Idle_FoldArms_Loop', greet: 'Idle_Talking_Loop', attack: [] },
+  // Alle Spielfiguren sind eigene Blender-Figuren (tools/blender/figuren/), Waffen aus tools/blender/waffen.py
+  // Sternenweberin: blonde Magierin in Creme und Türkis mit Stab
+  mage:      { rig: 'ual', file: 'eigene/sternenweberin.glb', hide: [], colors: {}, items: [['eigene/waffen/stab', 'r']], tip: 'r', idle: 'Idle_Loop', attack: ['Spell_Simple_Shoot', 'Spell_Simple_Shoot'] },
+  // Klingenwächter: Krieger in Rot und Bronze mit Plattenrüstung, Schwert und Schild
+  warrior:   { rig: 'ual', file: 'eigene/klingenwaechter.glb', hide: [], colors: {}, items: [['eigene/waffen/schwert', 'r'], ['eigene/waffen/schild', 'l']], tip: 'r', idle: 'Sword_Idle', attack: ['Sword_Regular_A', 'Sword_Regular_B'] },
+  // Waldläufer: Grün und Leder, Kapuze, Köcher und Bogen
+  ranger:    { rig: 'ual', file: 'eigene/waldlaeufer.glb', hide: [], colors: {}, items: [['eigene/waffen/bogen', 'l']], tip: 'l', idle: 'Idle_Loop', attack: ['Spell_Simple_Shoot', 'OverhandThrow'] },
+  // Schattenklinge: Violett und Silber, Kapuze, Gesichtstuch und zwei Dolche
+  rogue:     { rig: 'ual', file: 'eigene/schattenklinge.glb', hide: [], colors: {}, items: [['eigene/waffen/dolch', 'r'], ['eigene/waffen/dolch', 'l']], tip: 'r', idle: 'Sword_Idle', attack: ['Sword_Regular_C', 'Sword_Regular_B'] },
+  // Bärenherz: Fell und Eisen, bärtig, mit Zweihandaxt
+  barbarian: { rig: 'ual', file: 'eigene/baerenherz.glb', hide: [], colors: {}, items: [['eigene/waffen/axt', 'r']], tip: 'r', idle: 'Sword_Idle', attack: ['Sword_Heavy_Combo', 'Sword_Attack'] },
+  // Mira, die Bäuerin: Leinen und Grün
+  mira:      { rig: 'ual', file: 'eigene/mira.glb', hide: [], colors: {}, items: [], tip: 'r', idle: 'Idle_FoldArms_Loop', greet: 'Idle_Talking_Loop', attack: [] },
 };
 // Zauber ohne Waffenschlag (Fertigkeiten 3–5: Blütenregen, Heilquelle, Windstoß)
 const SPELL = { 0: 'Ranged_Magic_Shoot', 1: 'Ranged_Magic_Shoot', 2: 'Ranged_Magic_Spellcasting', 3: 'Ranged_Magic_Raise', 4: 'Ranged_Magic_Summon' };
@@ -77,7 +84,8 @@ function load(url){
   return cache.get(url);
 }
 const findBone = (root, name) => root.getObjectByName(name) || root.getObjectByName(name.replace(/\./g, ''));
-const modelUrl = def => RIGS[def.rig].base + 'figuren/' + def.model + '.glb';
+// file: eigene Figur außerhalb des Figurenordners der Figurenart (z. B. 'eigene/sternenweberin.glb')
+const modelUrl = def => def.file ? ASSETS + def.file : RIGS[def.rig].base + 'figuren/' + def.model + '.glb';
 
 /* Lädt die Figuren der gewählten Klassen und alle benötigten Animationen. */
 export async function loadFigures(keys, onProgress){
@@ -86,7 +94,7 @@ export async function loadFigures(keys, onProgress){
   const items = [...new Set(defs.flatMap(d => d.items.map(i => i[0])))];
   const rigs = [...new Set(defs.map(d => d.rig))];
   const packs = rigs.flatMap(r => RIGS[r].packs.map(p => [r, RIGS[r].base + 'animationen/' + p + '.glb']));
-  const urls = [...models, ...items.map(i => ITEMS + i + '.gltf'), ...packs.map(p => p[1])];
+  const urls = [...models, ...items.map(itemUrl), ...packs.map(p => p[1])];
   let done = 0;
   const res = await Promise.all(urls.map(u => load(u).then(g => { done++; if (onProgress) onProgress(done / urls.length); return g; })));
   const lib = { models: {}, items: {}, clips: {}, rest: {}, parts: {} };
@@ -139,7 +147,7 @@ export function createFigure(lib, key){
     if (side === def.tip && !tip) {
       const box = new THREE.Box3().setFromObject(lib.items[name].scene);
       tip = new THREE.Object3D();
-      tip.position.set(0, name.startsWith('bow') ? (box.min.y + box.max.y) / 2 : box.max.y * 0.92, 0);
+      tip.position.set(0, /bow|bogen/.test(name) ? (box.min.y + box.max.y) / 2 : box.max.y * 0.92, 0);
       w.add(tip);
     }
   }

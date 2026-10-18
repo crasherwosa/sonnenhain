@@ -25,6 +25,7 @@ Bei jedem fremden Modell die Lizenz und Quelle hier eintragen.
 | Datei | Quelle | Lizenz |
 | --- | --- | --- |
 | `characters/kaykit/` | KayKit Adventurers 2.0 und Character Animations 1.1, Kay Lousberg | CC0 |
+| `characters/eigene/` | Eigene Figuren aus Blender; Körper, Gesicht, Augen, Brauen, Wimpern, Frisuren und Grundhaut aus MakeHuman (makehuman.org, Systemdateien), Skelett aus Quaternius Universal Base Characters | CC0 (MakeHuman, Quaternius), eigene Arbeit |
 | `characters/quaternius/` | Universal Base Characters, Modular Character Outfits – Fantasy, Universal Animation Library 1 und 2 (je Standard-Fassung), Quaternius | CC0 |
 | `environment/baeume/laubbaum-1.glb` | Form (Stamm, Äste, Blattkarten) und Blätter-Textur: eigene Arbeit. Rinde: „Jolcham Oak Bark 01“ von Charlotte Baglioni, Poly Haven (https://polyhaven.com/a/jolcham_oak_bark_01), auf 512 × 1024 verkleinert, weicher und wärmer gefärbt | Rinde CC0, Rest eigene Arbeit |
 | `environment/baeume/laubbaum-2.glb` | wie `laubbaum-1.glb` (gleiche Rinde und Blätter-Textur, eigene Form) | Rinde CC0, Rest eigene Arbeit |

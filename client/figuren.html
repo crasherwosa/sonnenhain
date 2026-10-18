@@ -25,7 +25,7 @@ import * as THREE from 'three';
 import { loadFigures, createFigure, FIGURES } from './figuren.js';
 
 // Figurenschau: alle Klassen nebeneinander, Bewegungen per Knopf.
-// Adresszusätze: ?klasse=mage&anim=Sword_Idle&zeit=0.4&nah=1 (für Screenshots)
+// Adresszusätze: ?klasse=mage&anim=Sword_Idle&zeit=0.4&nah=1 oder &gesicht=1 (für Screenshots)
 const q = new URLSearchParams(location.search);
 const NAMES = { mage: 'Sternenweberin', warrior: 'Klingenwächter', ranger: 'Waldläufer', rogue: 'Schattenklinge', barbarian: 'Bärenherz', mira: 'Mira' };
 const keys = q.get('klasse') ? q.get('klasse').split(',') : Object.keys(NAMES);
@@ -38,6 +38,12 @@ document.body.prepend(renderer.domElement);
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xcfe3ee);
 scene.add(new THREE.HemisphereLight(0xfff4e0, 0x6d7f5a, 1.4));
+{ // Umgebung für Spiegelungen auf Metall (wie im Spiel: Himmel oben, warmer Horizont, Wiese unten)
+  const envMat = new THREE.ShaderMaterial({ side: THREE.BackSide, vertexShader: 'varying vec3 d; void main(){ d = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }',
+    fragmentShader: 'varying vec3 d; void main(){ float y = d.y; vec3 c = y > 0. ? mix(vec3(1.0,0.9,0.78), vec3(0.45,0.62,0.85), pow(y,0.6)) : mix(vec3(0.75,0.72,0.6), vec3(0.3,0.38,0.22), pow(-y,0.5)); gl_FragColor = vec4(c*0.9,1.); }' });
+  const envScene = new THREE.Scene(); envScene.add(new THREE.Mesh(new THREE.SphereGeometry(50, 32, 16), envMat));
+  scene.environment = new THREE.PMREMGenerator(renderer).fromScene(envScene, 0.02).texture;
+}
 const sun = new THREE.DirectionalLight(0xffffff, 2.2);
 sun.position.set(4, 8, 6); sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024);
 Object.assign(sun.shadow.camera, { left: -6, right: 6, top: 6, bottom: -6 });
@@ -76,12 +82,13 @@ for (const [label, a] of ANIMS) {
 // Kamera: ziehen zum Drehen, zwei Finger oder Mausrad zum Zoomen
 let yaw = 0, pitch = 0.12, dist = 2.6 + keys.length * 1.05, look = new THREE.Vector3(0, 0.95, 0);
 if (q.get('nah')) { dist = 2.4; look.y = 1.0; look.x = figs[0].group.position.x; }
+if (q.get('gesicht')) { dist = 0.75; look.y = 1.6; look.x = figs[0].group.position.x; pitch = 0.02; }   // Nahaufnahme des Kopfes
 if (q.get('ohne')) figs.forEach(f => f.root.traverse(o => { if (q.get('ohne').split(',').includes(o.name)) o.visible = false; }));
 let drag = null;
 renderer.domElement.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY }; });
 addEventListener('pointerup', () => { drag = null; });
 addEventListener('pointermove', e => { if (!drag) return; yaw -= (e.clientX - drag.x) * 0.008; pitch = Math.max(-0.2, Math.min(1.2, pitch + (e.clientY - drag.y) * 0.006)); drag = { x: e.clientX, y: e.clientY }; });
-addEventListener('wheel', e => { dist = Math.max(1, Math.min(14, dist * (1 + e.deltaY * 0.001))); }, { passive: true });
+addEventListener('wheel', e => { dist = Math.max(0.5, Math.min(14, dist * (1 + e.deltaY * 0.001))); }, { passive: true });
 if (q.get('yaw')) yaw = +q.get('yaw');
 
 // feste Pose für Screenshots
