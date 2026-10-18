@@ -8,7 +8,7 @@ Animationen aus `../quaternius/animationen/ual.glb`. Kleidung, Rüstung, Waffen 
 | Datei | Klasse | Farben | Inhalt |
 | --- | --- | --- | --- |
 | `sternenweberin.glb` | Magierin | Creme und Türkis | Blonde Abenteurerin nach dem Referenzbild: Oberteil mit türkiser Borte, Lederkorsett, gravierte Goldschulter, Stoffbahnen vorne und hinten, Armschienen mit Goldband, Stiefel mit Stulpen, Goldreif mit Stein |
-| `klingenwaechter.glb` | Krieger | Rot und Bronze | Roter Wams, gravierter Brustpanzer, Schulterplatten, Armschienen, Plattenschurz, Beinschienen, roter Waffenrock mit Bronzeborte, Bart |
+| `klingenwaechter.glb` | Krieger | Rot und Gold | Von Hand in Blender gebaut (Mac, nach GW3-Vorbild): dicke, geschichtete rote Platten mit goldenen Kanten und Ranken, große Schulterstücke, dunkle Gürtel mit Türkisschnalle, Plattenschurz, rote Stoffbahn, Beinschienen, Bart. Ca. 22.000 Dreiecke, eigene Farb-, Relief- und Metalltextur |
 | `waldlaeufer.glb` | Waldläufer | Grün und Leder | Kapuze, Schulterumhang mit Goldborte, Lederweste mit Nieten, Köcher mit Pfeilen, Armschienen, hohe Stiefel, Bart |
 | `schattenklinge.glb` | Schurkin | Violett und Silber | Kapuze mit Umhang, Gesichtstuch, Lederwams, Silberschulter, Armschienen mit Silberbändern, Dolchscheiden, viele Riemen |
 | `baerenherz.glb` | Barbar | Fell und Eisen | Bärenfellumhang, Ledergeschirr, Eisenschulter und -armschienen, Lederschurz mit Eisenplatten, lange rote Haare, Vollbart |
@@ -16,7 +16,7 @@ Animationen aus `../quaternius/animationen/ual.glb`. Kleidung, Rüstung, Waffen 
 | `waffen/*.glb` | – | – | Schwert, Schild, Stab, Bogen, Dolch, Zweihandaxt: schlank, mit Bronze-, Gold- oder Silberbeschlägen |
 | `alle-figuren.jpg` | – | – | Vorher und jetzt im Vergleich |
 
-Jede Figur hat höchstens ca. 15.000 Dreiecke und Texturen von höchstens 1024 × 1024 Pixeln (iPhone), jede Waffe unter
+Jede Figur hat höchstens ca. 15.000 Dreiecke (der von Hand gebaute Klingenwächter ca. 22.000, Grenze 25.000) und Texturen von höchstens 1024 × 1024 Pixeln (iPhone), jede Waffe unter
 1.000 Dreiecke. Teile (Meshes) einer Figur: `Body` (Haut, Augen), `Strands` (Frisur, Brauen und Wimpern aus dünnen
 Flächen mit Durchsicht), `Outfit` (Kleidung und Rüstung), bei manchen `Hair` (Bart, Strähnen) und `Headgear` (Reif);
 einzeln ausblendbar über `hide` in `client/figuren.js`.
