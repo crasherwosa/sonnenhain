@@ -25,7 +25,7 @@ Erkenntnisse aus den Guild-Wars-3-Bildern und was daraus für Sonnenhain folgt:
 **Was im Code geht und was aus Blender kommen muss:**
 
 - **Im Code (`client/umgebung.js`, `client/index.html`):** Licht, Himmelsfarben, Dunst, Nebelbänder, Gras im Gegenlicht, Blumengruppen, Pollen, Wind, Wasser, Filmkorn.
-- **Aus Blender (am Mac, freie CC0-Modelle, Quelle in `assets/README.md`):** Charakterbäume, Felsen und Klippen, Ruinen und Gebäude. Diese Teile ersetzen nach und nach die einfachen Formen aus dem Code. Ziel pro Modell: höchstens ca. 5 000 Dreiecke für Bäume, 2 000 für Felsen, Texturen höchstens 1024 × 1024 Pixel.
+- **Aus Blender (am Mac, freie CC0-Modelle, Quelle in `assets/README.md`):** Charakterbäume, Büsche, Felsen, Klippen und Ruinen sind da (`assets/environment/`). Als Nächstes Gebäude (Hof, Windmühle). Ziel pro Modell: höchstens ca. 5 000 Dreiecke für Bäume, 2 000 für Felsen, Texturen höchstens 1024 × 1024 Pixel.
 
 ## Figuren
 
@@ -50,9 +50,10 @@ Erkenntnisse aus den Guild-Wars-3-Bildern:
 
 ## Leistung
 
-- „Ultra“ (Mac): alles an, inklusive Nebelbänder, Lichtstrahlen und Unschärfe in der Ferne.
-- „Hoch“: Nebel, Pollen und Gegenlicht an, keine Unschärfe.
-- „Mittel“ (iPhone): weniger Gras und Pollen, kein Wind, einfacher Dunst. Die Stimmung (Farben, Licht) bleibt gleich.
+- „Ultra“ (Mac): alles an, inklusive Lichtstrahlen und Filmkorn. Unschärfe in der Ferne ist geplant.
+- „Hoch“: wie Ultra, aber weniger Gras und Pflanzen.
+- „Mittel“ (iPhone): weniger Gras, kein Wind, keine Lichtstrahlen, kein Filmkorn. Nebelbänder, Farben und Licht bleiben gleich, weil sie fast nichts kosten.
+- Die Tageszeit („Goldene Stunde“ oder „Mittag“) wählt man auf dem Startbildschirm.
 
 ## Benutzeroberfläche
 
