@@ -1,6 +1,6 @@
 # Fahrplan
 
-Stand: 17.10.2026
+Stand: 18.10.2026
 
 ## Erledigt
 
@@ -22,9 +22,11 @@ Stand: 17.10.2026
 
 - Alle Figuren im GW3-Stil selbst gebaut (`assets/characters/eigene/`): Sternenweberin, Klingenwächter, Waldläufer, Schattenklinge, Bärenherz und Mira, je mit Haupt- und Schmuckfarbe, Rüstung in Lagen (Stoff, Leder, graviertes Metall), gemalten Texturen und halbrealistischen Gesichtern. Dazu eigene schlanke Waffen (Schwert, Schild, Stab, Bogen, Dolche, Axt) statt der KayKit-Waffen. Baukasten `tools/blender/figurlib.py`, Rezepte in `tools/blender/figuren/`, Vergleich in `assets/characters/eigene/alle-figuren.jpg`.
 
+- Flüssiger spielen: Das Spiel zeichnet pro Bild etwa ein Drittel weniger Dreiecke („Mittel“ 5,6 → 3,2 Mio., „Hoch“ 6,1 → 4,1 Mio., „Ultra“ 12,6 → 7,7 Mio.). Der Schattenbereich deckt bei tiefer Sonne kein langes Band mehr ab, Bäume liegen in kleineren Feldern, Blumen und Kiesel werden nur in der Nähe gezeichnet, Büsche werfen erst ab „Hoch“ Schatten, Kleinkram fehlt im Spiegelbild des Sees. Neue Grasfelder werden über mehrere Bilder verteilt gefüllt, damit es beim Laufen nicht mehr hakt. Die Auflösung passt sich automatisch an, wenn die Bildrate unter 50 fps fällt (Anzeige oben links, z. B. „Hoch 85 %“). Ohne gespeicherte Wahl startet das Spiel auf „Hoch“, am Handy auf „Mittel“.
+
 ## Als Nächstes
 
-1. **Aufräumen und Leistung:** `client/index.html` in Module aufteilen (Welt, Spieler, Kampf, Gegner, Quests, Oberfläche). Grafikstufen neu abstimmen, damit es am Mac und iPhone flüssig läuft.
+1. **Aufräumen und Leistung:** `client/index.html` in Module aufteilen (Welt, Spieler, Kampf, Gegner, Quests, Oberfläche). Für weitere Leistung: einfachere Baummodelle für die Ferne (LOD) aus Blender, Gegner aus wenigen Teilen statt vielen Kugeln.
 2. **Quests aus Daten:** Herz-Aufgabe aus `content/quests/` laden statt fest im Code.
 3. **Lore:** Weltgeschichte, Regionen und erste Kapitel in `docs/lore.md` ausarbeiten.
 4. **Klassen-Fertigkeiten:** je Klasse eigene Fertigkeiten (Schwert, Bogen, Dolche, Axt, Magie). Die Angriffs-Animationen je Klasse sind schon da (`client/figuren.js`).
